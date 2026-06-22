@@ -153,7 +153,10 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 .caprow input.capnum{font-family:var(--font-text); font-weight:700; font-size:14px; border:1px solid var(--wv-border); background:#fff; border-radius:8px; padding:3px 8px; width:118px; text-align:right; color:var(--wv-ink); -moz-appearance:textfield}
 .caprow input.capnum:focus{outline:none; border-color:var(--wv-green); box-shadow:0 0 0 3px rgba(9,209,140,.14)}
 .caprow .caphint{color:var(--wv-muted); font-weight:500; font-size:11px}
-.osub-chip{color:var(--wv-green-deep); font-weight:700}
+.osub-chip{color:var(--wv-green-deep); font-weight:700; cursor:pointer; border-bottom:1px dashed currentColor; padding:1px 3px; border-radius:4px}
+.osub-chip:hover{background:var(--wv-mint-tint)}
+.caprow-close{margin-left:auto; border:none; background:transparent; color:var(--wv-green-deep); cursor:pointer; font-size:18px; line-height:1; padding:0 6px; border-radius:6px}
+.caprow-close:hover{background:#D7F3E6; color:var(--wv-ink)}
 
 /* results table */
 .tbl{width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums; font-size:13.5px}
@@ -415,7 +418,7 @@ function renderInputs(){
           <button class="rm" data-idx="${r.idx}" title="Remove investor">&times;</button>
         </div>
       </div>
-      ${inv.osub?`<div class="caprow">Covers shortfall up to <span class="pre">$</span><input type="number" class="capnum" data-idx="${r.idx}" min="0" step="1000" value="${inv.cap??""}" placeholder="no limit"><span class="caphint">leave blank = unlimited</span></div>`:""}
+      ${inv.osub&&inv.capOpen?`<div class="caprow">Covers shortfall up to <span class="pre">$</span><input type="number" class="capnum" data-idx="${r.idx}" min="0" step="1000" value="${inv.cap??""}" placeholder="no limit"><span class="caphint">leave blank = unlimited</span><button class="caprow-close" data-idx="${r.idx}" title="Close">&times;</button></div>`:""}
     </div>`;
   }).join("");
   wireRows();
@@ -449,8 +452,15 @@ function renderOutputs(){
     const el=document.querySelector(`.inv-meta[data-meta="${r.idx}"]`);
     if(el){
       let meta=`Now <b>${fmtPct(r.curPct)}</b> · Pro-rata <b>${fmtUSD(r.prorata)}</b>`;
-      if(r.oversub>0.5) meta+=` · <span class="osub-chip">+${fmtUSD(r.oversub)} oversub → ${fmtUSD(r.actual)} in</span>`;
-      else { const cover=r.prorata>0?Math.min(999,Math.round(r.base/r.prorata*100)):0; meta+=` · ${cover}% of pro-rata`; }
+      if(r.osub){
+        const cap=S.investors[r.idx].cap;
+        const capTxt=(cap===""||cap==null)?"":` · limit ${fmtUSD(cap)}`;
+        const amt=r.oversub>0.5?`+${fmtUSD(r.oversub)} oversub → ${fmtUSD(r.actual)} in`:`oversubscribing`;
+        meta+=` · <span class="osub-chip" role="button" tabindex="0" title="Set / edit limit">${amt}${capTxt} ✎</span>`;
+      } else {
+        const cover=r.prorata>0?Math.min(999,Math.round(r.base/r.prorata*100)):0;
+        meta+=` · ${cover}% of pro-rata`;
+      }
       el.innerHTML=meta;
     }
   });
@@ -517,11 +527,15 @@ function wireRows(){
     const i=+e.target.dataset.idx;
     S.investors[i].osub=e.target.checked;
     if(S.investors[i].cap===undefined) S.investors[i].cap="";
-    renderInputs();   // structural: shows/hides the cap field
+    if(!e.target.checked) S.investors[i].capOpen=false;   // hide limit editor when turning off
+    renderInputs();
   }));
   document.querySelectorAll(".capnum").forEach(el=>el.addEventListener("input",e=>{
     S.investors[+e.target.dataset.idx].cap = e.target.value===""?"":(+e.target.value||0);
     renderOutputs();
+  }));
+  document.querySelectorAll(".caprow-close").forEach(el=>el.addEventListener("click",e=>{
+    S.investors[+e.target.dataset.idx].capOpen=false; renderInputs();
   }));
   document.querySelectorAll(".rename").forEach(el=>el.addEventListener("change",e=>{ S.investors[+e.target.dataset.idx].name=e.target.value; renderOutputs(); }));
   document.querySelectorAll(".rm").forEach(el=>el.addEventListener("click",e=>{ S.investors.splice(+e.target.dataset.idx,1); renderInputs(); }));
@@ -567,6 +581,15 @@ function bindModal(openIds, overlayId, closeId){
 }
 bindModal(["openSettings","statusPill"],"settingsOverlay","closeSettings");
 bindModal(["openInfo"],"infoOverlay","closeInfo");
+
+/* Click the oversub amount to open/close that investor's limit editor */
+document.getElementById("investors").addEventListener("click",e=>{
+  const chip=e.target.closest(".osub-chip"); if(!chip) return;
+  const row=chip.closest(".inv"); if(!row) return;
+  const i=+row.dataset.idx;
+  S.investors[i].capOpen=!S.investors[i].capOpen;
+  renderInputs();
+});
 document.addEventListener("keydown",e=>{ if(e.key==="Escape") document.querySelectorAll(".modal-overlay").forEach(ov=>ov.hidden=true); });
 
 syncLevers();

@@ -146,22 +146,6 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 .delta.flat{color:var(--wv-muted)}
 .neg{color:var(--wv-negative)}
 
-/* ownership bars */
-.barwrap{margin-bottom:14px}
-.barwrap .bl{display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:5px}
-.barwrap .bl .nm{font-weight:600}
-.barwrap .bl .pc{font-variant-numeric:tabular-nums; color:var(--wv-body); font-weight:700}
-.track{position:relative; height:26px; background:var(--wv-surface); border-radius:8px; overflow:hidden}
-.fill-now{position:absolute; left:0; top:0; bottom:0; background:repeating-linear-gradient(45deg,#cfd6d2,#cfd6d2 6px,#d8ded a 6px,#d8deda 12px); opacity:.0}
-.seg{position:absolute; top:0; bottom:0; border-radius:8px}
-.seg.now{background:#C7CFCB}
-.seg.aft{background:var(--wv-green); top:auto; height:11px; bottom:3px; border-radius:6px; box-shadow:0 2px 6px rgba(9,209,140,.3)}
-.barwrap .legend{font-size:11px; color:var(--wv-muted); margin-top:2px}
-
-.legend-row{display:flex; gap:18px; font-size:12px; color:var(--wv-body); margin-bottom:16px; flex-wrap:wrap}
-.legend-row .it{display:flex; align-items:center; gap:6px}
-.legend-row .sw{width:14px; height:14px; border-radius:4px; display:inline-block}
-
 .foot{margin-top:26px; font-size:12px; color:var(--wv-muted); line-height:1.7}
 .foot b{color:var(--wv-body)}
 @media (max-width:1080px){
@@ -236,14 +220,8 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 
     <!-- OUTPUTS -->
     <div class="card">
-      <h2>Ownership — before &amp; after</h2>
-      <div class="legend-row">
-        <span class="it"><span class="sw" style="background:#C7CFCB"></span>Current</span>
-        <span class="it"><span class="sw" style="background:var(--wv-green)"></span>After round</span>
-      </div>
-      <div id="bars"></div>
-
-      <h2 style="margin-top:24px">Result table</h2>
+      <h2>Result table</h2>
+      <p class="hint">Final ownership for every shareholder after the round.</p>
       <div style="overflow-x:auto">
         <table class="tbl" id="resultTable"></table>
       </div>
@@ -358,7 +336,7 @@ function compute(){
 /* ---------------- Rendering ----------------
    Split in two so dragging a slider NEVER rebuilds the slider element:
    - renderInputs() rebuilds the investor rows (only on structural change)
-   - renderOutputs() recomputes KPIs/bars/table/meta on every drag         */
+   - renderOutputs() recomputes KPIs/table/meta on every drag              */
 
 function sliderMax(r){
   // scale each slider to the investor's own pro-rata, so the usable range
@@ -444,22 +422,6 @@ function renderOutputs(){
         <div style="font-size:13px;color:var(--wv-body)">Invests <b>${fmtUSD(m.externalFill)}</b> → ${fmtSh(m.ext.newShares)} shares → <b>${fmtPct(m.ext.newPct)}</b> ownership</div>
       </div>
     </div>`;
-
-  // Ownership bars
-  const allRows = [...m.rows, m.ext].filter(r=>r.curPct>0||r.newPct>0.0005);
-  document.getElementById("bars").innerHTML = allRows.map(r=>{
-    const wNow=(r.curPct*100).toFixed(2), wAft=(r.newPct*100).toFixed(2);
-    return `
-    <div class="barwrap">
-      <div class="bl"><span class="nm">${esc(r.name)}</span>
-        <span class="pc">${fmtPct(r.curPct)} → <span style="color:var(--wv-green-deep)">${fmtPct(r.newPct)}</span>
-          <span class="${deltaClass(r.delta)}">(${fmtPctSign(r.delta)})</span></span></div>
-      <div class="track">
-        <div class="seg now" style="width:${wNow}%"></div>
-        <div class="seg aft" style="width:${wAft}%"></div>
-      </div>
-    </div>`;
-  }).join("");
 
   // Result table
   const tbl=document.getElementById("resultTable");

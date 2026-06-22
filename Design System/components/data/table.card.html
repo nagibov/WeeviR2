@@ -1,0 +1,28 @@
+<!-- @dsCard group="Components" viewport="700x300" name="Financial Table" subtitle="Grey actuals vs mint projections" -->
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../../styles.css">
+<style>body{margin:0;padding:24px;font-family:var(--font-data);background:var(--wv-page)}
+.card{background:#fff;border-radius:var(--radius-lg);padding:22px;box-shadow:var(--shadow-card)}
+.hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.hd b{font-size:15px;color:var(--wv-ink)}.hd span{font-weight:600;font-size:11px;color:var(--wv-muted)}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th{text-align:right;font-weight:700;font-size:12px;padding:9px 13px}
+th.act{background:var(--wv-surface);color:var(--wv-ink)}th.proj{background:var(--surface-projection);color:var(--text-success)}
+td{text-align:right;font-weight:500;font-size:13px;padding:10px 13px}
+td.lbl{text-align:left;font-weight:600;color:var(--wv-ink)}
+td.act{background:#f7f8f7;color:var(--wv-body);border-bottom:1px solid var(--wv-surface)}
+td.proj{background:#f4fdf8;color:var(--text-success);border-bottom:1px solid var(--surface-projection)}
+tr.tot td{font-weight:700;border-bottom:none}tr.tot td.act{background:var(--wv-surface);color:var(--wv-ink)}tr.tot td.proj{background:var(--surface-projection)}
+.neg{color:var(--wv-negative) !important}</style></head>
+<body>
+  <div class="card">
+    <div class="hd"><b>Financial performance</b><span>Grey = actuals · Mint = projections</span></div>
+    <table>
+      <thead><tr><th></th><th class="act">2025</th><th class="act">Apr 26</th><th class="proj">Nov 26</th><th class="proj">Nov 27</th></tr></thead>
+      <tbody>
+        <tr><td class="lbl">Total Sales</td><td class="act">530,725</td><td class="act">83,842</td><td class="proj">94,252</td><td class="proj">97,151</td></tr>
+        <tr><td class="lbl">Gross Margin</td><td class="act">507,096</td><td class="act">83,842</td><td class="proj">94,252</td><td class="proj">97,151</td></tr>
+        <tr class="tot"><td class="lbl">Net Income</td><td class="act neg">(445,815)</td><td class="act">1,197</td><td class="proj">12,252</td><td class="proj">15,151</td></tr>
+      </tbody>
+    </table>
+  </div>
+</body></html>

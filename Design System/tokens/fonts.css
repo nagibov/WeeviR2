@@ -1,0 +1,5 @@
+/* Webfonts — Quicksand (display) + Manrope (text & data).
+   NOTE: loaded from Google Fonts CDN. No local binaries were available from the
+   source PDF, so these are the closest faithful match. Swap in licensed .woff2
+   files here as @font-face rules if you have them. */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Quicksand:wght@400;500;600;700&display=swap');

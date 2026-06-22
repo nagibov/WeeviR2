@@ -1,0 +1,32 @@
+:root {
+  /* ---- Families ---- */
+  --font-display: 'Quicksand', system-ui, sans-serif;  /* headlines, big numbers */
+  --font-text: 'Manrope', system-ui, sans-serif;       /* UI, body, labels */
+  --font-data: 'Manrope', system-ui, sans-serif;       /* financial data (tabular) */
+
+  /* ---- Type scale ---- */
+  --text-display: 64px;   /* hero headline (Quicksand 700) */
+  --text-h1: 46px;
+  --text-h2: 34px;        /* section heading (Quicksand 700) */
+  --text-subhead: 20px;   /* Manrope 700 */
+  --text-body-size: 16px; /* Manrope 500, line-height 1.6 */
+  --text-small: 14px;
+  --text-eyebrow: 12px;   /* Manrope 700, uppercase, tracked */
+  --text-metric: 42px;    /* KPI numbers (Manrope 800, tabular) */
+
+  /* ---- Weights ---- */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-extrabold: 800;
+
+  /* ---- Line height ---- */
+  --leading-tight: 1.02;
+  --leading-snug: 1.4;
+  --leading-body: 1.6;
+
+  /* ---- Tracking ---- */
+  --tracking-eyebrow: 0.18em;
+  --tracking-tight: -0.02em;
+}

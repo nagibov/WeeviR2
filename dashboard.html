@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Weevi — Round 2 Live Cap Table Explorer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --wv-green:#09D18C; --wv-green-deep:#0A8F63; --wv-ink:#2E2E2F;
+  --wv-mint-tint:#EAFBF3; --wv-mint-wash:#F1FDF7;
+  --wv-white:#fff; --wv-off-white:#FAFBFA; --wv-page:#F1F3F2; --wv-surface:#F0F2F1;
+  --wv-border:#E3E6E4; --wv-muted:#8A8F8C; --wv-body:#41514A;
+  --wv-negative:#C0392B; --wv-amber:#E0962F; --wv-amber-bg:#FFF7ED; --wv-amber-text:#B56A14;
+  --wv-grad-1:#F8F7E9; --wv-grad-2:#DEF9EB; --wv-grad-3:#DAFEE5; --wv-grad-4:#E4F2F3; --wv-grad-5:#EAEBFC;
+  --wv-gradient:linear-gradient(118deg,var(--wv-grad-1) 0%,var(--wv-grad-2) 20%,var(--wv-grad-3) 40%,var(--wv-grad-4) 64%,var(--wv-grad-5) 100%);
+  --radius-card:18px; --radius-hero:28px; --shadow-rest:0 1px 2px rgba(0,0,0,.06);
+  --shadow-green:0 8px 22px rgba(9,209,140,.26);
+  --font-display:"Quicksand",system-ui,"Segoe UI",sans-serif;
+  --font-text:"Manrope",system-ui,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  font-family:var(--font-text); color:var(--wv-ink); background:var(--wv-page);
+  font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1480px; margin:0 auto; padding:22px 26px 60px;}
+
+/* ---------- Header ---------- */
+.hero{
+  background:var(--wv-gradient); border-radius:var(--radius-hero); padding:26px 30px;
+  position:relative; overflow:hidden; box-shadow:var(--shadow-rest); margin-bottom:18px;
+}
+.hero::after{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background-image:radial-gradient(rgba(9,209,140,.16) 1.3px, transparent 1.4px);
+  background-size:18px 18px;
+  -webkit-mask-image:linear-gradient(125deg, transparent 40%, #000 100%);
+  mask-image:linear-gradient(125deg, transparent 40%, #000 100%);
+}
+.hero-row{display:flex; align-items:center; justify-content:space-between; gap:20px; position:relative; z-index:1; flex-wrap:wrap}
+.brand{display:flex; align-items:center; gap:14px}
+.brand img{height:34px; width:auto; display:block}
+.brand .fallback{font-family:var(--font-display); font-weight:700; font-size:26px; color:var(--wv-ink); letter-spacing:-.02em}
+.eyebrow{font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--wv-green-deep); font-weight:700; margin:0 0 4px}
+h1{font-family:var(--font-display); font-weight:700; font-size:27px; margin:0; letter-spacing:-.01em; color:var(--wv-ink)}
+.hero p{margin:5px 0 0; color:var(--wv-body); max-width:640px; font-size:14px}
+.status-pill{
+  display:inline-flex; align-items:center; gap:8px; font-weight:700; font-size:14px;
+  padding:10px 18px; border-radius:999px; background:#fff; box-shadow:var(--shadow-rest);
+}
+.status-pill .dot{width:10px; height:10px; border-radius:50%}
+
+/* ---------- Global levers ---------- */
+.levers{
+  display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:16px;
+}
+.lever{
+  background:var(--wv-white); border-radius:var(--radius-card); padding:16px 18px; box-shadow:var(--shadow-rest);
+}
+.lever label{display:block; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--wv-muted); font-weight:700; margin-bottom:8px}
+.lever .field{display:flex; align-items:center; gap:6px}
+.lever .pre{color:var(--wv-muted); font-weight:600}
+.lever input[type=number]{
+  font-family:var(--font-text); font-weight:700; font-size:21px; color:var(--wv-ink);
+  border:1px solid transparent; background:var(--wv-off-white); border-radius:10px;
+  padding:6px 10px; width:100%; -moz-appearance:textfield;
+}
+.lever input[type=number]:focus{outline:none; border-color:var(--wv-green); background:#fff; box-shadow:0 0 0 3px rgba(9,209,140,.14)}
+
+/* ---------- KPI row ---------- */
+.kpis{display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-bottom:18px}
+.kpi{background:var(--wv-white); border-radius:var(--radius-card); padding:16px 18px; box-shadow:var(--shadow-rest)}
+.kpi.green{background:var(--wv-green); color:#fff; box-shadow:var(--shadow-green)}
+.kpi .k-label{font-size:11px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:var(--wv-muted)}
+.kpi.green .k-label{color:rgba(255,255,255,.85)}
+.kpi .k-val{font-family:var(--font-display); font-weight:700; font-size:25px; margin-top:6px; letter-spacing:-.01em; font-variant-numeric:tabular-nums}
+.kpi .k-sub{font-size:12px; color:var(--wv-muted); margin-top:2px}
+.kpi.green .k-sub{color:rgba(255,255,255,.85)}
+
+/* ---------- Toolbar ---------- */
+.toolbar{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:14px}
+.toolbar .group{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+.toolbar .spacer{flex:1}
+.btn{
+  font-family:var(--font-text); font-weight:600; font-size:13.5px; cursor:pointer;
+  border-radius:999px; padding:9px 16px; border:1px solid var(--wv-border); background:#fff; color:var(--wv-ink);
+  transition:filter .15s ease, transform .05s ease;
+}
+.btn:hover{filter:brightness(.98)}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:var(--wv-green); border-color:var(--wv-green); color:#fff; box-shadow:var(--shadow-green)}
+.btn.ghost{background:transparent}
+.toolbar .label{font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--wv-muted); font-weight:700; margin-right:2px}
+
+/* ---------- Main grid ---------- */
+.main{display:grid; grid-template-columns:1.55fr 1fr; gap:18px; align-items:start}
+.card{background:var(--wv-white); border-radius:var(--radius-card); box-shadow:var(--shadow-rest); padding:22px}
+.card h2{font-family:var(--font-display); font-weight:700; font-size:18px; margin:0 0 4px}
+.card .hint{font-size:12.5px; color:var(--wv-muted); margin:0 0 16px}
+
+/* investor rows */
+.inv{padding:14px 0; border-bottom:1px solid var(--wv-border)}
+.inv:last-child{border-bottom:none}
+.inv.external{background:var(--wv-mint-wash); border-radius:12px; padding:14px; margin-top:4px; border:1px dashed #B9E8D3}
+.inv-top{display:flex; align-items:center; justify-content:space-between; gap:10px}
+.inv-name{font-weight:700; font-size:15px; display:flex; align-items:center; gap:8px}
+.inv-name .tag{font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--wv-green-deep); background:var(--wv-mint-tint); padding:2px 8px; border-radius:999px}
+.inv-name input.rename{font-family:var(--font-text); font-weight:700; font-size:15px; border:1px solid transparent; background:transparent; border-radius:6px; padding:2px 4px; width:170px}
+.inv-name input.rename:focus{outline:none; border-color:var(--wv-green); background:#fff}
+.inv-meta{font-size:12px; color:var(--wv-muted); font-variant-numeric:tabular-nums}
+.inv-meta b{color:var(--wv-body)}
+.inv-controls{display:grid; grid-template-columns:1fr 150px auto; gap:14px; align-items:center; margin-top:12px}
+input[type=range]{-webkit-appearance:none; appearance:none; width:100%; height:6px; border-radius:999px; background:var(--wv-surface); outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; appearance:none; width:20px; height:20px; border-radius:50%; background:var(--wv-green); cursor:pointer; box-shadow:0 2px 6px rgba(9,209,140,.4); border:3px solid #fff}
+input[type=range]::-moz-range-thumb{width:18px; height:18px; border-radius:50%; background:var(--wv-green); cursor:pointer; border:3px solid #fff}
+.amt{display:flex; align-items:center; gap:4px; background:var(--wv-off-white); border:1px solid var(--wv-border); border-radius:10px; padding:4px 8px}
+.amt .pre{color:var(--wv-muted); font-weight:600; font-size:13px}
+.amt input{font-family:var(--font-text); font-weight:700; font-size:15px; border:none; background:transparent; width:100%; text-align:right; -moz-appearance:textfield; color:var(--wv-ink)}
+.amt input:focus{outline:none}
+input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none; margin:0}
+.osub{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--wv-muted); font-weight:600; cursor:pointer; user-select:none; white-space:nowrap}
+.osub input{accent-color:var(--wv-green); width:16px; height:16px}
+.rm{border:none; background:transparent; color:var(--wv-muted); cursor:pointer; font-size:18px; line-height:1; padding:2px 6px; border-radius:6px}
+.rm:hover{color:var(--wv-negative); background:#fbecea}
+
+/* results table */
+.tbl{width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums; font-size:13.5px}
+.tbl th{text-align:right; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--wv-muted); font-weight:700; padding:0 8px 10px; border-bottom:2px solid var(--wv-border)}
+.tbl th:first-child{text-align:left}
+.tbl td{padding:9px 8px; border-bottom:1px solid var(--wv-border); text-align:right}
+.tbl td:first-child{text-align:left; font-weight:600}
+.tbl tr.total td{font-weight:800; border-top:2px solid var(--wv-ink); border-bottom:none; padding-top:11px}
+.tbl tr.ext td{color:var(--wv-green-deep)}
+.delta.up{color:var(--wv-green-deep); font-weight:700}
+.delta.down{color:var(--wv-negative); font-weight:700}
+.delta.flat{color:var(--wv-muted)}
+.neg{color:var(--wv-negative)}
+
+/* ownership bars */
+.barwrap{margin-bottom:14px}
+.barwrap .bl{display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:5px}
+.barwrap .bl .nm{font-weight:600}
+.barwrap .bl .pc{font-variant-numeric:tabular-nums; color:var(--wv-body); font-weight:700}
+.track{position:relative; height:26px; background:var(--wv-surface); border-radius:8px; overflow:hidden}
+.fill-now{position:absolute; left:0; top:0; bottom:0; background:repeating-linear-gradient(45deg,#cfd6d2,#cfd6d2 6px,#d8ded a 6px,#d8deda 12px); opacity:.0}
+.seg{position:absolute; top:0; bottom:0; border-radius:8px}
+.seg.now{background:#C7CFCB}
+.seg.aft{background:var(--wv-green); top:auto; height:11px; bottom:3px; border-radius:6px; box-shadow:0 2px 6px rgba(9,209,140,.3)}
+.barwrap .legend{font-size:11px; color:var(--wv-muted); margin-top:2px}
+
+.legend-row{display:flex; gap:18px; font-size:12px; color:var(--wv-body); margin-bottom:16px; flex-wrap:wrap}
+.legend-row .it{display:flex; align-items:center; gap:6px}
+.legend-row .sw{width:14px; height:14px; border-radius:4px; display:inline-block}
+
+.foot{margin-top:26px; font-size:12px; color:var(--wv-muted); line-height:1.7}
+.foot b{color:var(--wv-body)}
+@media (max-width:1080px){
+  .main{grid-template-columns:1fr}
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .levers{grid-template-columns:1fr}
+  .inv-controls{grid-template-columns:1fr; gap:8px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-row">
+      <div>
+        <div class="brand">
+          <img src="Design System/assets/weevi-logo.png" alt="Weevi" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+          <span class="fallback" style="display:none">weevi</span>
+        </div>
+        <p class="eyebrow" style="margin-top:14px">Round 2 Financing · Live Model</p>
+        <h1>Cap Table Explorer</h1>
+        <p>Pro-rata participation with oversubscription. Adjust each investor's commitment live — price per share, new shares, and final ownership recalculate instantly. Any shortfall is auto-filled by an external party.</p>
+      </div>
+      <div class="status-pill" id="statusPill"><span class="dot"></span><span id="statusText">Fully funded</span></div>
+    </div>
+  </div>
+
+  <!-- GLOBAL LEVERS -->
+  <div class="levers">
+    <div class="lever">
+      <label>Pre-money Valuation</label>
+      <div class="field"><span class="pre">$</span><input type="number" id="preMoney" step="100000"></div>
+    </div>
+    <div class="lever">
+      <label>Required Investment Round</label>
+      <div class="field"><span class="pre">$</span><input type="number" id="round" step="50000"></div>
+    </div>
+    <div class="lever">
+      <label>Existing Shares</label>
+      <div class="field"><input type="number" id="existingShares" step="100"></div>
+    </div>
+  </div>
+
+  <!-- KPI ROW -->
+  <div class="kpis" id="kpis"></div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <span class="label">Scenarios</span>
+    <div class="group">
+      <button class="btn" data-preset="prorata">Everyone pro-rata</button>
+      <button class="btn" data-preset="kgroup">K Group only</button>
+      <button class="btn" data-preset="minority">Minority only</button>
+      <button class="btn" data-preset="none">Nobody participates</button>
+    </div>
+    <span class="spacer"></span>
+    <button class="btn primary" id="addInv">+ Add investor</button>
+    <button class="btn ghost" id="resetAll">Reset to base case</button>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <!-- INPUTS -->
+    <div class="card">
+      <h2>Participation</h2>
+      <p class="hint">Drag a slider or type an amount. Toggle <b>Oversubscribe</b> to let an investor commit above their pro-rata share.</p>
+      <div id="investors"></div>
+    </div>
+
+    <!-- OUTPUTS -->
+    <div class="card">
+      <h2>Ownership — before &amp; after</h2>
+      <div class="legend-row">
+        <span class="it"><span class="sw" style="background:#C7CFCB"></span>Current</span>
+        <span class="it"><span class="sw" style="background:var(--wv-green)"></span>After round</span>
+      </div>
+      <div id="bars"></div>
+
+      <h2 style="margin-top:24px">Result table</h2>
+      <div style="overflow-x:auto">
+        <table class="tbl" id="resultTable"></table>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <b>How the model works:</b> Shares are issued at a fixed pre-money price per share = Pre-money ÷ Existing Shares.
+    Each investor receives (Actual Investment ÷ Price) new shares. Final ownership = (current + new shares) ÷ total shares after the round —
+    the denominator grows as money comes in, so ownership does <b>not</b> move linearly with the cheque size.
+    The <b>External Party</b> automatically absorbs any portion of the round that current investors don't cover.<br>
+    <span style="font-size:11px">Source model: <b>Docs/Shares Dashboard.xlsx</b> → "Dashboard" sheet (Option 4 · Pro-Rata + Oversubscription). Built for the Round 2 investor meeting.</span>
+  </div>
+</div>
+
+<script>
+/* ---------------- Base case (from the "Dashboard" sheet) ---------------- */
+const BASE = {
+  preMoney: 6200000,
+  round: 750000,
+  existingShares: 2500,
+  investors: [
+    {name:"K Group Holding", shares:2000, actual:100000, osub:false},
+    {name:"Joseph Sioufi",   shares:175,  actual:52500,  osub:false},
+    {name:"Jihad Pakradon",  shares:175,  actual:52500,  osub:false},
+    {name:"Rshied Khazen",   shares:50,   actual:15000,  osub:false},
+    {name:"Dany Germanos",   shares:50,   actual:15000,  osub:false},
+    {name:"Saleh Khazen",    shares:50,   actual:15000,  osub:false},
+  ]
+};
+const PALETTE = ["#09D18C","#0A8F63","#2E2E2F","#5BB3E0","#E0962F","#9B7EDE","#E06A8B","#3FA796","#C0392B","#6C7A89"];
+
+let S = structuredClone(BASE);
+
+/* ---------------- Formatters ---------------- */
+const fmtUSD = n => "$"+Math.round(n).toLocaleString("en-US");
+const fmtUSD0 = n => { const v=Math.round(n); return v<0 ? "("+Math.abs(v).toLocaleString("en-US")+")" : v.toLocaleString("en-US"); };
+const fmtPct = n => (n*100).toFixed(1)+"%";
+const fmtPctSign = n => (n>=0?"+":"")+(n*100).toFixed(1)+"%";
+const fmtSh = n => n.toLocaleString("en-US",{maximumFractionDigits:1});
+
+/* ---------------- Core model ---------------- */
+function compute(){
+  const pre=S.preMoney, round=S.round, exShares=S.existingShares;
+  const price = exShares>0 ? pre/exShares : 0;
+  const sumActual = S.investors.reduce((a,i)=>a+(+i.actual||0),0);
+  const externalFill = Math.max(0, round - sumActual);
+  const totalRaised = sumActual + externalFill;          // == max(round, sumActual)
+  const totalNewShares = price>0 ? totalRaised/price : 0;
+  const totalAfter = exShares + totalNewShares;
+
+  // eligible excess pool (oversubscribers above their pro-rata)
+  const totalExcess = S.investors.reduce((a,i)=>{
+    const prorata = (exShares>0 ? i.shares/exShares : 0)*round;
+    return a + (i.osub ? Math.max(0,(+i.actual||0)-prorata) : 0);
+  },0);
+
+  const rows = S.investors.map((inv,idx)=>{
+    const curPct = exShares>0 ? inv.shares/exShares : 0;
+    const prorata = curPct*round;
+    const newShares = price>0 ? (+inv.actual||0)/price : 0;
+    const after = inv.shares + newShares;
+    const newPct = totalAfter>0 ? after/totalAfter : 0;
+    const shortfall = Math.max(0, prorata-(+inv.actual||0));
+    const excess = inv.osub ? Math.max(0,(+inv.actual||0)-prorata) : 0;
+    return {idx, name:inv.name, color:PALETTE[idx%PALETTE.length],
+      curShares:inv.shares, curPct, prorata, actual:(+inv.actual||0),
+      newShares, after, newPct, delta:newPct-curPct, shortfall, excess, osub:inv.osub};
+  });
+
+  // External party row
+  const extNew = price>0 ? externalFill/price : 0;
+  const extPct = totalAfter>0 ? extNew/totalAfter : 0;
+  const ext = {name:"External Party (auto-fill)", color:"#6C7A89",
+    curShares:0, curPct:0, prorata:0, actual:externalFill,
+    newShares:extNew, after:extNew, newPct:extPct, delta:extPct, isExt:true};
+
+  return {price, pre, round, exShares, sumActual, externalFill, totalRaised,
+          totalNewShares, totalAfter, totalExcess, rows, ext};
+}
+
+/* ---------------- Rendering ---------------- */
+function render(){
+  const m = compute();
+
+  // KPIs
+  const overUnder = m.sumActual - m.round;
+  document.getElementById("kpis").innerHTML = `
+    ${kpi("Price / Share", fmtUSD(m.price), "pre-money basis")}
+    ${kpi("Post-money Valuation", fmtUSD(m.pre+m.round), "pre + round")}
+    ${kpi("Total Raised", fmtUSD(m.totalRaised), "incl. external fill", true)}
+    ${kpi("External Fill", fmtUSD(m.externalFill), m.externalFill>0?"unallocated round":"fully covered")}
+    ${kpi("Internal Commitments", fmtUSD(m.sumActual), (overUnder>0?"+"+fmtUSD(overUnder)+" over":overUnder<0?fmtUSD(-overUnder)+" under":"meets round"))}
+  `;
+
+  // Status pill
+  const pill=document.getElementById("statusPill"), txt=document.getElementById("statusText"), dot=pill.querySelector(".dot");
+  if(Math.abs(overUnder)<1){ txt.textContent="Round fully covered by insiders"; dot.style.background="var(--wv-green)"; }
+  else if(overUnder>0){ txt.textContent="Oversubscribed by "+fmtUSD(overUnder); dot.style.background="var(--wv-amber)"; }
+  else { txt.textContent="External fills "+fmtUSD(m.externalFill); dot.style.background="var(--wv-green-deep)"; }
+
+  // Investor input rows
+  const box=document.getElementById("investors");
+  box.innerHTML = m.rows.map(r=>{
+    const inv=S.investors[r.idx];
+    const max=Math.max(m.round, r.prorata*2, r.actual, 50000);
+    const cover = r.prorata>0 ? Math.min(999,Math.round(r.actual/r.prorata*100)) : 0;
+    return `
+    <div class="inv" data-idx="${r.idx}">
+      <div class="inv-top">
+        <div class="inv-name">
+          <span class="sw" style="width:11px;height:11px;border-radius:3px;background:${r.color};display:inline-block"></span>
+          <input class="rename" value="${esc(inv.name)}" data-idx="${r.idx}">
+        </div>
+        <div class="inv-meta">Now <b>${fmtPct(r.curPct)}</b> · Pro-rata <b>${fmtUSD(r.prorata)}</b> · ${cover}% of pro-rata</div>
+      </div>
+      <div class="inv-controls">
+        <input type="range" min="0" max="${Math.ceil(max)}" step="1000" value="${r.actual}" data-idx="${r.idx}" class="sld">
+        <div class="amt"><span class="pre">$</span><input type="number" min="0" step="1000" value="${Math.round(r.actual)}" data-idx="${r.idx}" class="num"></div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <label class="osub" title="Allow commitment above pro-rata"><input type="checkbox" class="osw" data-idx="${r.idx}" ${inv.osub?"checked":""}>Oversub.</label>
+          <button class="rm" data-idx="${r.idx}" title="Remove investor">&times;</button>
+        </div>
+      </div>
+    </div>`;
+  }).join("") + `
+    <div class="inv external">
+      <div class="inv-top">
+        <div class="inv-name"><span class="sw" style="width:11px;height:11px;border-radius:3px;background:#6C7A89;display:inline-block"></span>External Party <span class="tag">auto</span></div>
+        <div class="inv-meta">Fills the gap automatically</div>
+      </div>
+      <div class="inv-controls" style="grid-template-columns:1fr auto">
+        <div style="font-size:13px;color:var(--wv-body)">Invests <b>${fmtUSD(m.externalFill)}</b> → ${fmtSh(m.ext.newShares)} shares → <b>${fmtPct(m.ext.newPct)}</b> ownership</div>
+      </div>
+    </div>`;
+
+  // Ownership bars
+  const allRows = [...m.rows, m.ext].filter(r=>r.curPct>0||r.newPct>0.0005);
+  document.getElementById("bars").innerHTML = allRows.map(r=>{
+    const wNow=(r.curPct*100).toFixed(2), wAft=(r.newPct*100).toFixed(2);
+    return `
+    <div class="barwrap">
+      <div class="bl"><span class="nm">${esc(r.name)}</span>
+        <span class="pc">${fmtPct(r.curPct)} → <span style="color:var(--wv-green-deep)">${fmtPct(r.newPct)}</span>
+          <span class="${deltaClass(r.delta)}">(${fmtPctSign(r.delta)})</span></span></div>
+      <div class="track">
+        <div class="seg now" style="width:${wNow}%"></div>
+        <div class="seg aft" style="width:${wAft}%"></div>
+      </div>
+    </div>`;
+  }).join("");
+
+  // Result table
+  const tbl=document.getElementById("resultTable");
+  const head=`<thead><tr>
+    <th>Shareholder</th><th>Now %</th><th>Invest</th><th>New shares</th><th>After %</th><th>Δ vs now</th>
+  </tr></thead>`;
+  const body = m.rows.map(r=>`<tr>
+    <td>${esc(r.name)}</td>
+    <td>${fmtPct(r.curPct)}</td>
+    <td>${fmtUSD(r.actual)}</td>
+    <td>${fmtSh(r.newShares)}</td>
+    <td><b>${fmtPct(r.newPct)}</b></td>
+    <td class="${deltaClass(r.delta)}">${fmtPctSign(r.delta)}</td>
+  </tr>`).join("");
+  const extRow=`<tr class="ext">
+    <td>External Party</td><td>0.0%</td><td>${fmtUSD(m.externalFill)}</td>
+    <td>${fmtSh(m.ext.newShares)}</td><td><b>${fmtPct(m.ext.newPct)}</b></td><td class="delta up">${fmtPctSign(m.ext.delta)}</td></tr>`;
+  const totShares=m.rows.reduce((a,r)=>a+r.newShares,0)+m.ext.newShares;
+  const totRow=`<tr class="total">
+    <td>Total</td><td>100.0%</td><td>${fmtUSD(m.totalRaised)}</td>
+    <td>${fmtSh(totShares)}</td><td>100.0%</td><td>—</td></tr>`;
+  tbl.innerHTML = head+"<tbody>"+body+extRow+totRow+"</tbody>";
+
+  wireRows();
+}
+
+function kpi(label,val,sub,green){
+  return `<div class="kpi ${green?"green":""}"><div class="k-label">${label}</div><div class="k-val">${val}</div><div class="k-sub">${sub}</div></div>`;
+}
+function deltaClass(d){ return d>0.0005?"delta up":d<-0.0005?"delta down":"delta flat"; }
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+/* ---------------- Wiring ---------------- */
+function wireRows(){
+  document.querySelectorAll(".sld").forEach(el=>el.oninput=e=>{ S.investors[+e.target.dataset.idx].actual=+e.target.value; render(); });
+  document.querySelectorAll(".num").forEach(el=>el.oninput=e=>{ S.investors[+e.target.dataset.idx].actual=+e.target.value||0; render(); });
+  document.querySelectorAll(".osw").forEach(el=>el.onchange=e=>{ S.investors[+e.target.dataset.idx].osub=e.target.checked; render(); });
+  document.querySelectorAll(".rename").forEach(el=>el.onchange=e=>{ S.investors[+e.target.dataset.idx].name=e.target.value; render(); });
+  document.querySelectorAll(".rm").forEach(el=>el.onclick=e=>{ S.investors.splice(+e.target.dataset.idx,1); render(); });
+}
+
+document.getElementById("preMoney").oninput=e=>{ S.preMoney=+e.target.value||0; render(); };
+document.getElementById("round").oninput=e=>{ S.round=+e.target.value||0; render(); };
+document.getElementById("existingShares").oninput=e=>{ S.existingShares=+e.target.value||0; render(); };
+
+document.getElementById("addInv").onclick=()=>{
+  S.investors.push({name:"New Investor "+(S.investors.length+1), shares:0, actual:100000, osub:true});
+  render();
+};
+document.getElementById("resetAll").onclick=()=>{ S=structuredClone(BASE); syncLevers(); render(); };
+
+document.querySelectorAll("[data-preset]").forEach(b=>b.onclick=()=>applyPreset(b.dataset.preset));
+function applyPreset(p){
+  const ex=S.existingShares, round=S.round;
+  S.investors.forEach(i=>{
+    const prorata=(ex>0?i.shares/ex:0)*round;
+    const isK=/k group/i.test(i.name);
+    const isMinor=i.shares<=50;
+    if(p==="prorata"){ i.actual=prorata; i.osub=false; }
+    else if(p==="kgroup"){ i.actual= isK?prorata:0; i.osub=false; }
+    else if(p==="minority"){ i.actual= isMinor?prorata:0; i.osub=false; }
+    else if(p==="none"){ i.actual=0; i.osub=false; }
+  });
+  render();
+}
+
+function syncLevers(){
+  document.getElementById("preMoney").value=S.preMoney;
+  document.getElementById("round").value=S.round;
+  document.getElementById("existingShares").value=S.existingShares;
+}
+
+syncLevers();
+render();
+</script>
+</body>
+</html>

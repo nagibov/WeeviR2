@@ -1,0 +1,24 @@
+<!-- @dsCard group="Components" viewport="700x180" name="Badge" subtitle="Trademark & status pills" -->
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../../styles.css">
+<style>body{margin:0;padding:24px;font-family:var(--font-text);background:#fff;display:flex;flex-direction:column;gap:14px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:7px;font-weight:700;font-size:13px;padding:7px 14px;border-radius:var(--radius-pill);white-space:nowrap}
+.solid{background:var(--color-primary);color:#fff}
+.mint{background:var(--color-accent-soft);color:var(--text-success)}
+.outline{background:#fff;color:var(--text-strong);border:1.5px solid var(--border-default)}
+.dark{background:var(--text-strong);color:#fff}
+.status{font-weight:600;border-radius:var(--radius-sm);padding:6px 13px}
+.dot{width:7px;height:7px;border-radius:50%}</style></head>
+<body>
+  <div class="row">
+    <span class="pill solid">Weevi Pay™</span>
+    <span class="pill mint">Smart Dispatch™</span>
+    <span class="pill outline">Weevi Loyalty™</span>
+    <span class="pill dark">AI Ordering™</span>
+  </div>
+  <div class="row">
+    <span class="pill status" style="background:var(--wv-mint-wash);color:var(--text-success)"><span class="dot" style="background:var(--wv-green)"></span>Live</span>
+    <span class="pill status" style="background:var(--wv-surface);color:var(--wv-muted)"><span class="dot" style="background:#b6bbb8"></span>Beta</span>
+    <span class="pill status" style="background:var(--wv-amber-bg);color:var(--wv-amber-text)"><span class="dot" style="background:var(--wv-amber)"></span>Aug 2026</span>
+  </div>
+</body></html>

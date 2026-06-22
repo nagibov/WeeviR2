@@ -1,0 +1,54 @@
+:root {
+  /* ---- Brand ---- */
+  --wv-green: #09D18C;        /* primary signal colour — action, growth */
+  --wv-green-deep: #0A8F63;   /* text-safe green (AA on white) */
+  --wv-ink: #2E2E2F;          /* charcoal — text & structure */
+
+  /* ---- Green tints ---- */
+  --wv-mint-tint: #EAFBF3;
+  --wv-mint-wash: #F1FDF7;
+
+  /* ---- Neutrals ---- */
+  --wv-white: #FFFFFF;
+  --wv-off-white: #FAFBFA;
+  --wv-page: #F1F3F2;         /* app/page background */
+  --wv-surface: #F0F2F1;      /* subtle filled surface, table actuals */
+  --wv-border: #E3E6E4;
+  --wv-muted: #8A8F8C;        /* muted/secondary text */
+  --wv-body: #41514A;         /* body copy on light */
+
+  /* ---- Status ---- */
+  --wv-negative: #C0392B;
+  --wv-amber: #E0962F;
+  --wv-amber-bg: #FFF7ED;
+  --wv-amber-text: #B56A14;
+
+  /* ---- Pastel gradient (hero / cover surfaces) ---- */
+  --wv-grad-1: #F8F7E9;
+  --wv-grad-2: #DEF9EB;
+  --wv-grad-3: #DAFEE5;
+  --wv-grad-4: #E4F2F3;
+  --wv-grad-5: #EAEBFC;
+  --wv-gradient: linear-gradient(118deg,
+      var(--wv-grad-1) 0%, var(--wv-grad-2) 20%, var(--wv-grad-3) 40%,
+      var(--wv-grad-4) 64%, var(--wv-grad-5) 100%);
+
+  /* ---- Semantic aliases ---- */
+  --color-primary: var(--wv-green);
+  --color-primary-pressed: var(--wv-green-deep);
+  --color-accent-soft: var(--wv-mint-tint);
+
+  --text-strong: var(--wv-ink);
+  --text-body: var(--wv-body);
+  --text-muted: var(--wv-muted);
+  --text-on-primary: #FFFFFF;
+  --text-success: var(--wv-green-deep);
+  --text-negative: var(--wv-negative);
+
+  --surface-page: var(--wv-page);
+  --surface-card: var(--wv-white);
+  --surface-subtle: var(--wv-surface);
+  --surface-projection: var(--wv-mint-tint);
+
+  --border-default: var(--wv-border);
+}

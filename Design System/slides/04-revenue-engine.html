@@ -1,0 +1,48 @@
+<!-- @dsCard group="Slides" viewport="1280x720" name="Revenue engine slide" subtitle="Multi-layer monetization — Pay, Dispatch, Loyalty, AI" -->
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css">
+<style>
+  *{box-sizing:border-box}html,body{margin:0;padding:0}
+  .slide{width:1280px;height:720px;overflow:hidden;font-family:var(--font-text);background:var(--wv-page);-webkit-font-smoothing:antialiased;padding:64px 80px;display:flex;flex-direction:column}
+  .top{display:flex;align-items:center;justify-content:space-between}
+  .top img{height:24px}
+  .eyebrow{font-weight:700;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--wv-green-deep)}
+  h2{font-family:var(--font-display);font-weight:700;font-size:48px;letter-spacing:-.02em;color:var(--wv-ink);margin:16px 0 4px}
+  .sub{font-weight:500;font-size:17px;line-height:1.5;color:var(--wv-body);max-width:74ch}
+  .grid{flex:1;display:grid;grid-template-columns:repeat(2,1fr);grid-template-rows:1fr 1fr;gap:20px;margin-top:30px}
+  .card{background:#fff;border-radius:var(--radius-lg);padding:26px 28px;box-shadow:var(--shadow-card);display:flex;gap:20px;align-items:flex-start}
+  .tile{position:relative;flex:none;display:inline-flex;align-items:center;justify-content:center;width:54px;height:54px;border-radius:var(--radius-md);background:var(--wv-off-white);box-shadow:inset 0 0 0 1px var(--border-default);color:var(--wv-ink)}
+  .tile svg{width:26px;height:26px}
+  .tile::after{content:"";position:absolute;top:7px;right:7px;width:9px;height:9px;border-radius:50%;background:var(--color-primary);box-shadow:0 0 0 2px #fff}
+  .name{font-weight:800;font-size:20px;color:var(--wv-ink)}
+  .model{font-weight:700;font-size:14px;color:var(--text-success);margin-top:4px}
+  .desc{font-weight:500;font-size:14px;line-height:1.5;color:var(--wv-body);margin-top:9px}
+  .chip{display:inline-block;margin-top:11px;font-weight:600;font-size:12px;padding:5px 11px;border-radius:var(--radius-pill);background:var(--wv-surface);color:var(--wv-muted)}
+  .chip.amber{background:var(--wv-amber-bg);color:var(--wv-amber-text)}
+</style></head>
+<body>
+  <div class="slide">
+    <div class="top"><span class="eyebrow">Revenue Expansion Engine</span><img src="../assets/weevi-logo.png" alt="Weevi"></div>
+    <h2>From SaaS to ecosystem</h2>
+    <p class="sub">Weevi is evolving from a pure subscription platform into a multi-layer monetization ecosystem — combining recurring revenue with high-frequency transaction streams.</p>
+    <div class="grid">
+      <div class="card">
+        <span class="tile"><i data-lucide="credit-card"></i></span>
+        <div><div class="name">Weevi Pay™</div><div class="model">0.5% per transaction</div><div class="desc">White-label payments. ~$82M GMV processed (Jan 2025 – Apr 2026), ~$4M online and growing.</div><span class="chip">Live</span></div>
+      </div>
+      <div class="card">
+        <span class="tile"><i data-lucide="truck"></i></span>
+        <div><div class="name">Smart Dispatch™</div><div class="model">~1 SAR per delivery</div><div class="desc">Unified dispatch across 8+ delivery providers. ~1,000 deliveries / day from August 2026.</div><span class="chip amber">Aug 2026</span></div>
+      </div>
+      <div class="card">
+        <span class="tile"><i data-lucide="award"></i></span>
+        <div><div class="name">Weevi Loyalty™</div><div class="model">$25 / month / branch</div><div class="desc">Tiers, points, cashback wallets and gamified rewards. Lifts revenue per client with no new acquisition cost.</div><span class="chip">Live</span></div>
+      </div>
+      <div class="card">
+        <span class="tile"><i data-lucide="sparkles"></i></span>
+        <div><div class="name">AI Ordering™</div><div class="model">$0.5 per order</div><div class="desc">WhatsApp conversational ordering, piloting with Burger King, Malak El Taouk and Deek Duke.</div><span class="chip amber">Aug 2026</span></div>
+      </div>
+    </div>
+  </div>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script>lucide.createIcons();</script>
+</body></html>

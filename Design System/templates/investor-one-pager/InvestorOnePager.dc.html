@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Weevi Investor One-Pager" description="Single-page investor snapshot: brand header, gradient hero, KPI row, financials table and highlights, footer." -->
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="./ds-base.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>*{box-sizing:border-box}html,body{margin:0;padding:0}body{background:#f1f3f2}
+  svg.hi-ico{width:18px;height:18px}svg.pr-ico{width:20px;height:20px}</style>
+</helmet>
+
+<div style="background:#f1f3f2; min-height:100vh; font-family:'Manrope',sans-serif; color:#2e2e2f; -webkit-font-smoothing:antialiased; padding:40px 0 80px">
+  <div style="max-width:1120px; margin:0 auto; padding:0 40px">
+
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:28px">
+      <div style="display:flex; align-items:center; gap:14px">
+        <img src="../../assets/weevi-logo.png" alt="Weevi" style="height:26px; width:auto; display:block">
+        <div style="width:1px; height:22px; background:#dfe3e1"></div>
+        <span style="font-family:'Quicksand',sans-serif; font-weight:600; font-size:15px; color:#2e2e2f">{{subtitleLabel}}</span>
+      </div>
+      <span style="font-weight:700; font-size:13px; color:#fff; background:#2e2e2f; padding:7px 14px; border-radius:999px">{{dateLabel}}</span>
+    </div>
+
+    <div style="position:relative; border-radius:28px; overflow:hidden; background:linear-gradient(118deg,#f8f7e9 0%,#def9eb 20%,#dafee5 40%,#e4f2f3 64%,#eaebfc 100%)">
+      <div style="position:absolute; inset:0; background-image:radial-gradient(circle, rgba(255,255,255,.9) 1.4px, transparent 1.6px); background-size:26px 26px; -webkit-mask-image:linear-gradient(115deg, rgba(0,0,0,0) 35%, rgba(0,0,0,.55) 70%, rgba(0,0,0,0) 95%); mask-image:linear-gradient(115deg, rgba(0,0,0,0) 35%, rgba(0,0,0,.55) 70%, rgba(0,0,0,0) 95%)"></div>
+      <div style="position:relative; padding:56px 56px">
+        <span style="font-weight:700; font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:#0a8f63">{{eyebrow}}</span>
+        <h1 style="font-family:'Quicksand',sans-serif; font-weight:700; font-size:54px; line-height:1.02; letter-spacing:-.01em; color:#2e2e2f; margin:16px 0 0; max-width:16ch">{{headline}}</h1>
+        <p style="font-weight:500; font-size:17px; line-height:1.6; color:#41514a; max-width:62ch; margin:18px 0 0">{{intro}}</p>
+      </div>
+    </div>
+
+    <div style="margin-top:48px">
+      <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:20px">
+        <h2 style="font-family:'Quicksand',sans-serif; font-weight:700; font-size:26px; color:#2e2e2f; margin:0">By the numbers</h2>
+        <span style="font-weight:600; font-size:13px; color:#9aa09c">{{periodLabel}}</span>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:20px">
+        <x-import component-from-global-scope="WeeviDesignSystem_c9c4bf.KPICard" label="Total Revenue" value="$929K" trend="75% YoY" trend-dir="up" variant="light" hint-size="100%,188px"></x-import>
+        <x-import component-from-global-scope="WeeviDesignSystem_c9c4bf.KPICard" label="MRR" value="$54K" sublabel="Monthly recurring" variant="light" hint-size="100%,188px"></x-import>
+        <x-import component-from-global-scope="WeeviDesignSystem_c9c4bf.KPICard" label="Active Accounts" value="246" sublabel="1,082 branches" variant="green" hint-size="100%,188px"></x-import>
+        <x-import component-from-global-scope="WeeviDesignSystem_c9c4bf.KPICard" label="Orders / year" value="1.3M" sublabel="320K+ active users" variant="dark" hint-size="100%,188px"></x-import>
+      </div>
+    </div>
+
+    <div style="margin-top:48px">
+      <div style="display:grid; grid-template-columns:1.7fr 1fr; gap:20px; align-items:start">
+        <x-import component-from-global-scope="WeeviDesignSystem_c9c4bf.FinancialTable" title="Financial performance" note="Grey = actuals · Mint = projections" hint-size="100%,300px"></x-import>
+
+        <div style="background:#fff; border-radius:18px; padding:28px; box-shadow:0 1px 2px rgba(0,0,0,.06)">
+          <span style="font-weight:700; font-size:12px; letter-spacing:.04em; text-transform:uppercase; color:#09d18c">Key highlights</span>
+          <div style="display:flex; flex-direction:column; gap:14px; margin-top:18px">
+            <sc-for list="{{highlights}}" as="h" hint-placeholder-count="4">
+              <div style="display:flex; align-items:center; gap:12px"><span style="display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:10px; background:#eafbf3; color:#0a8f63; flex:none"><i data-lucide="{{h.icon}}" class="hi-ico"></i></span><span style="font-weight:600; font-size:15px; line-height:1.35; color:#2e2e2f">{{h.text}}</span></div>
+            </sc-for>
+          </div>
+          <div style="margin-top:24px; padding-top:20px; border-top:1px solid #eef0ef">
+            <span style="font-weight:700; font-size:11px; letter-spacing:.04em; text-transform:uppercase; color:#9aa09c">Product ecosystem</span>
+            <div style="display:flex; gap:20px; flex-wrap:wrap; margin-top:14px">
+              <sc-for list="{{products}}" as="p" hint-placeholder-count="3">
+                <div style="display:flex; align-items:center; gap:10px"><span style="position:relative; display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:12px; background:#fafbfa; box-shadow:inset 0 0 0 1px #e3e6e4; color:#2e2e2f"><i data-lucide="{{p.icon}}" class="pr-ico"></i><span style="position:absolute; top:6px; right:6px; width:8px; height:8px; border-radius:50%; background:#09d18c; box-shadow:0 0 0 2px #fff"></span></span><span style="font-weight:700; font-size:13px; color:#2e2e2f">{{p.name}}</span></div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:44px; padding-top:24px; border-top:1px solid #e3e6e4; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px">
+      <div style="display:flex; align-items:center; gap:12px">
+        <img src="../../assets/weevi-logo.png" style="height:20px; width:auto; opacity:.85">
+        <span style="font-weight:600; font-size:13px; color:#9aa09c">Assembled from Weevi design-system components</span>
+      </div>
+      <span style="font-weight:600; font-size:13px; color:#b6bbb8">© 2026 Weevi · Confidential</span>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 1200, &quot;height&quot;: 1100 },
+  &quot;subtitleLabel&quot;: { &quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;Investor Snapshot&quot;, &quot;tsType&quot;: &quot;string&quot; },
+  &quot;dateLabel&quot;: { &quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;May 2026&quot;, &quot;tsType&quot;: &quot;string&quot; },
+  &quot;eyebrow&quot;: { &quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;2026 Investors Report&quot;, &quot;tsType&quot;: &quot;string&quot; },
+  &quot;headline&quot;: { &quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;Growth, accelerated.&quot;, &quot;tsType&quot;: &quot;string&quot; },
+  &quot;intro&quot;: { &quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;Weevi has crossed break-even and entered a scalable revenue phase.&quot;, &quot;tsType&quot;: &quot;string&quot; },
+  &quot;periodLabel&quot;: { &quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;Trailing 12 months · May 2026&quot;, &quot;tsType&quot;: &quot;string&quot; }
+}">
+class Component extends DCLogic {
+  componentDidMount() { this._drawIcons(); }
+  componentDidUpdate() { this._drawIcons(); }
+  _drawIcons() {
+    let n = 0;
+    const t = setInterval(() => {
+      if (window.lucide) window.lucide.createIcons();
+      if (++n > 14) clearInterval(t);
+    }, 120);
+  }
+  renderVals() {
+    return {
+      subtitleLabel: this.props.subtitleLabel ?? 'Investor Snapshot',
+      dateLabel: this.props.dateLabel ?? 'May 2026',
+      eyebrow: this.props.eyebrow ?? '2026 Investors Report',
+      headline: this.props.headline ?? 'Growth, accelerated.',
+      intro: this.props.intro ?? 'Weevi has crossed break-even and entered a scalable revenue phase — expanding across Lebanon, KSA and the UK while diversifying into payments, delivery and AI ordering.',
+      periodLabel: this.props.periodLabel ?? 'Trailing 12 months · May 2026',
+      highlights: [
+        { icon: 'trending-up', text: 'Break-even reached in April 2026' },
+        { icon: 'dollar-sign', text: 'MRR up from ~$31K to ~$54K' },
+        { icon: 'map-pin', text: '141 new projects · 450+ locations' },
+        { icon: 'pie-chart', text: '95% market share in Lebanon' },
+      ],
+      products: [
+        { icon: 'credit-card', name: 'Weevi Pay™' },
+        { icon: 'truck', name: 'Smart Dispatch™' },
+        { icon: 'sparkles', name: 'AI Ordering™' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

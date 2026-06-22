@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Weevi Hero" description="Pastel-gradient cover hero with dotted growth motif, eyebrow, headline, and tag pills." -->
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="./ds-base.js"></script>
+<style>*{box-sizing:border-box}html,body{margin:0;padding:0}body{background:#f1f3f2}</style>
+</helmet>
+
+<div style="position:relative; border-radius:28px; overflow:hidden; margin:40px; background:linear-gradient(118deg,#f8f7e9 0%,#def9eb 20%,#dafee5 40%,#e4f2f3 64%,#eaebfc 100%); font-family:'Manrope',sans-serif; -webkit-font-smoothing:antialiased">
+  <sc-if value="{{showMotif}}" hint-placeholder-val="{{ true }}">
+    <div style="position:absolute; inset:0; background-image:radial-gradient(circle, rgba(255,255,255,.9) 1.4px, transparent 1.6px); background-size:26px 26px; -webkit-mask-image:linear-gradient(115deg, rgba(0,0,0,0) 35%, rgba(0,0,0,.55) 70%, rgba(0,0,0,0) 95%); mask-image:linear-gradient(115deg, rgba(0,0,0,0) 35%, rgba(0,0,0,.55) 70%, rgba(0,0,0,0) 95%)"></div>
+  </sc-if>
+  <div style="position:relative; padding:72px 64px">
+    <span style="font-weight:700; font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:#0a8f63">{{eyebrow}}</span>
+    <h1 style="font-family:'Quicksand',sans-serif; font-weight:700; font-size:64px; line-height:1.02; letter-spacing:-.01em; color:#2e2e2f; margin:18px 0 0; max-width:16ch">{{title}}</h1>
+    <p style="font-weight:500; font-size:18px; line-height:1.6; color:#41514a; max-width:54ch; margin:22px 0 0">{{subtitle}}</p>
+    <sc-if value="{{showTags}}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex; gap:10px; margin-top:34px; flex-wrap:wrap">
+        <sc-for list="{{tagItems}}" as="t" hint-placeholder-count="3">
+          <sc-if value="{{t.emphasis}}">
+            <span style="font-weight:600; font-size:13px; padding:9px 16px; border-radius:999px; white-space:nowrap; background:#2e2e2f; color:#fff">{{t.text}}</span>
+          </sc-if>
+          <sc-if value="{{t.quiet}}" hint-placeholder-val="{{ true }}">
+            <span style="font-weight:600; font-size:13px; padding:9px 16px; border-radius:999px; white-space:nowrap; background:rgba(255,255,255,.7); color:#2e2e2f">{{t.text}}</span>
+          </sc-if>
+        </sc-for>
+      </div>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 1000, &quot;height&quot;: 460 },
+  &quot;eyebrow&quot;: { &quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;2026 Investors Report&quot;, &quot;tsType&quot;: &quot;string&quot; },
+  &quot;title&quot;: { &quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;Growth, accelerated.&quot;, &quot;tsType&quot;: &quot;string&quot; },
+  &quot;subtitle&quot;: { &quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;Weevi has crossed break-even and entered a scalable revenue phase — expanding across Lebanon, KSA and the UK while diversifying into payments, delivery and AI ordering.&quot;, &quot;tsType&quot;: &quot;string&quot; },
+  &quot;showMotif&quot;: { &quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot; },
+  &quot;tags&quot;: { &quot;editor&quot;: null, &quot;tsType&quot;: &quot;string[]&quot; }
+}">
+class Component extends DCLogic {
+  renderVals() {
+    let tags = this.props.tags ?? ['320K+ users', '1.3M orders / year', 'Break-even reached'];
+    if (typeof tags === 'string') tags = tags.split('|').map((s) => s.trim()).filter(Boolean);
+    const tagItems = tags.map((t, i) => ({
+      text: t,
+      emphasis: i === 0,
+      quiet: i !== 0,
+    }));
+    return {
+      eyebrow: this.props.eyebrow ?? '2026 Investors Report',
+      title: this.props.title ?? 'Growth, accelerated.',
+      subtitle: this.props.subtitle ?? 'Weevi has crossed break-even and entered a scalable revenue phase — expanding across Lebanon, KSA and the UK while diversifying into payments, delivery and AI ordering.',
+      showMotif: this.props.showMotif ?? true,
+      tagItems,
+      showTags: tagItems.length > 0,
+    };
+  }
+}
+</script>
+</body>
+</html>

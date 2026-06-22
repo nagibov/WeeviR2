@@ -1,0 +1,18 @@
+<!-- @dsCard group="Components" viewport="700x170" name="IconTile" subtitle="tile · inline · plain charcoal" -->
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../../styles.css">
+<style>body{margin:0;padding:24px;font-family:var(--font-text);background:#fff;display:flex;gap:40px;align-items:flex-start}
+.col{display:flex;flex-direction:column;align-items:center;gap:10px}
+.lab{font-weight:600;font-size:11px;color:var(--wv-muted);letter-spacing:.03em}
+.tile{position:relative;display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:var(--radius-md);background:var(--wv-off-white);box-shadow:inset 0 0 0 1px var(--border-default);color:var(--wv-ink)}
+.bare{position:relative;display:inline-flex;color:var(--wv-ink);padding:14px}
+.tile svg,.bare svg{width:28px;height:28px}
+.acc::after{content:"";position:absolute;top:8px;right:8px;width:9px;height:9px;border-radius:50%;background:var(--color-primary);box-shadow:0 0 0 2px #fff}
+.bare.acc::after{top:8px;right:8px}</style></head>
+<body>
+  <div class="col"><span class="tile acc"><i data-lucide="credit-card"></i></span><span class="lab">tile + accent</span></div>
+  <div class="col"><span class="bare acc"><i data-lucide="truck"></i></span><span class="lab">inline + accent</span></div>
+  <div class="col"><span class="tile"><i data-lucide="bar-chart-3"></i></span><span class="lab">tile, no accent</span></div>
+  <div class="col"><span class="bare"><i data-lucide="users"></i></span><span class="lab">plain charcoal</span></div>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script>lucide.createIcons();</script>
+</body></html>

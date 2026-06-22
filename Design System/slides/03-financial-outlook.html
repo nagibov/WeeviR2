@@ -1,0 +1,62 @@
+<!-- @dsCard group="Slides" viewport="1280x720" name="Financial outlook slide" subtitle="Actuals vs projections — May 26 → Nov 27" -->
+<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css">
+<style>
+  *{box-sizing:border-box}html,body{margin:0;padding:0}
+  .slide{width:1280px;height:720px;overflow:hidden;font-family:var(--font-text);background:var(--wv-page);-webkit-font-smoothing:antialiased;padding:64px 80px;display:flex;flex-direction:column}
+  .top{display:flex;align-items:center;justify-content:space-between}
+  .top img{height:24px}
+  .eyebrow{font-weight:700;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--wv-green-deep)}
+  h2{font-family:var(--font-display);font-weight:700;font-size:48px;letter-spacing:-.02em;color:var(--wv-ink);margin:16px 0 4px}
+  .sub{font-weight:600;font-size:15px;color:var(--wv-muted)}
+  .cols{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:34px}
+  .col{border-radius:var(--radius-lg);padding:30px;display:flex;flex-direction:column}
+  .col.act{background:#fff;box-shadow:var(--shadow-card)}
+  .col.proj{background:var(--surface-projection)}
+  .tag{align-self:flex-start;font-weight:700;font-size:12px;letter-spacing:.04em;text-transform:uppercase;padding:6px 12px;border-radius:var(--radius-pill)}
+  .act .tag{background:var(--wv-surface);color:var(--wv-ink)}
+  .proj .tag{background:#fff;color:var(--text-success)}
+  .when{font-family:var(--font-display);font-weight:700;font-size:24px;margin:16px 0 0;color:var(--wv-ink)}
+  .metrics{margin-top:22px;display:flex;flex-direction:column;gap:18px}
+  .m .ml{font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.03em;color:var(--wv-muted)}
+  .proj .m .ml{color:#5a9b80}
+  .m .mv{font-weight:800;font-size:38px;line-height:1;margin-top:5px;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--wv-ink)}
+  .proj .m .mv{color:var(--text-success)}
+  .legend{margin-top:18px;font-weight:600;font-size:13px;color:var(--wv-muted)}
+</style></head>
+<body>
+  <div class="slide">
+    <div class="top"><span class="eyebrow">Financial Performance &amp; Outlook</span><img src="../assets/weevi-logo.png" alt="Weevi"></div>
+    <h2>Revenue outlook</h2>
+    <div class="sub">Reported actuals shaded grey · forward projections shaded mint</div>
+    <div class="cols">
+      <div class="col act">
+        <span class="tag">Current</span>
+        <div class="when">May 2026</div>
+        <div class="metrics">
+          <div class="m"><div class="ml">Yearly revenue</div><div class="mv">$929K</div></div>
+          <div class="m"><div class="ml">MRR</div><div class="mv">$54K</div></div>
+          <div class="m"><div class="ml">Total accounts</div><div class="mv">246</div></div>
+        </div>
+      </div>
+      <div class="col proj">
+        <span class="tag">Projected · Y2</span>
+        <div class="when">Nov 2026</div>
+        <div class="metrics">
+          <div class="m"><div class="ml">Yearly revenue</div><div class="mv">$1.1M</div></div>
+          <div class="m"><div class="ml">MRR</div><div class="mv">$72K</div></div>
+          <div class="m"><div class="ml">Total accounts</div><div class="mv">324</div></div>
+        </div>
+      </div>
+      <div class="col proj">
+        <span class="tag">Projected · Y3</span>
+        <div class="when">Nov 2027</div>
+        <div class="metrics">
+          <div class="m"><div class="ml">Yearly revenue</div><div class="mv">$1.3M</div></div>
+          <div class="m"><div class="ml">MRR</div><div class="mv">$107K</div></div>
+          <div class="m"><div class="ml">Total accounts</div><div class="mv">480</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="legend">Break-even reached April 2026 · MRR expected to fully cover operating expenses by September 2026.</div>
+  </div>
+</body></html>

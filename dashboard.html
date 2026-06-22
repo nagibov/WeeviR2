@@ -126,6 +126,12 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 .osub input{accent-color:var(--wv-green); width:16px; height:16px}
 .rm{border:none; background:transparent; color:var(--wv-muted); cursor:pointer; font-size:18px; line-height:1; padding:2px 6px; border-radius:6px}
 .rm:hover{color:var(--wv-negative); background:#fbecea}
+.caprow{display:flex; align-items:center; gap:8px; margin-top:10px; padding:8px 12px; background:var(--wv-mint-wash); border:1px solid #CDEFE0; border-radius:10px; font-size:12.5px; color:var(--wv-green-deep); font-weight:600; flex-wrap:wrap}
+.caprow .pre{color:var(--wv-muted); font-weight:600}
+.caprow input.capnum{font-family:var(--font-text); font-weight:700; font-size:14px; border:1px solid var(--wv-border); background:#fff; border-radius:8px; padding:3px 8px; width:118px; text-align:right; color:var(--wv-ink); -moz-appearance:textfield}
+.caprow input.capnum:focus{outline:none; border-color:var(--wv-green); box-shadow:0 0 0 3px rgba(9,209,140,.14)}
+.caprow .caphint{color:var(--wv-muted); font-weight:500; font-size:11px}
+.osub-chip{color:var(--wv-green-deep); font-weight:700}
 
 /* results table */
 .tbl{width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums; font-size:13.5px}
@@ -223,7 +229,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
     <!-- INPUTS -->
     <div class="card">
       <h2>Participation</h2>
-      <p class="hint">Drag a slider or type an amount. Toggle <b>Oversubscribe</b> to let an investor commit above their pro-rata share.</p>
+      <p class="hint">Drag a slider or type each investor's commitment. Tick <b>Oversubscribe</b> and an investor automatically absorbs a share of the round's shortfall (weighted by holding, up to an optional cap) — shrinking or removing the External Party.</p>
       <div id="investors"></div>
       <div id="externalBlock"></div>
     </div>
@@ -248,7 +254,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
     <b>How the model works:</b> Shares are issued at a fixed pre-money price per share = Pre-money ÷ Existing Shares.
     Each investor receives (Actual Investment ÷ Price) new shares. Final ownership = (current + new shares) ÷ total shares after the round —
     the denominator grows as money comes in, so ownership does <b>not</b> move linearly with the cheque size.
-    The <b>External Party</b> automatically absorbs any portion of the round that current investors don't cover.<br>
+    When investors <b>oversubscribe</b>, they absorb the shortfall left by non-participants first — split pro-rata to their current holding and capped at any limit you set — and only the remainder spills to the <b>External Party</b>.<br>
     <span style="font-size:11px">Source model: <b>Docs/Shares Dashboard.xlsx</b> → "Dashboard" sheet (Option 4 · Pro-Rata + Oversubscription). Built for the Round 2 investor meeting.</span>
   </div>
 </div>
@@ -260,12 +266,12 @@ const BASE = {
   round: 750000,
   existingShares: 2500,
   investors: [
-    {name:"K Group Holding", shares:2000, actual:100000, osub:false},
-    {name:"Joseph Sioufi",   shares:175,  actual:52500,  osub:false},
-    {name:"Jihad Pakradon",  shares:175,  actual:52500,  osub:false},
-    {name:"Rshied Khazen",   shares:50,   actual:15000,  osub:false},
-    {name:"Dany Germanos",   shares:50,   actual:15000,  osub:false},
-    {name:"Saleh Khazen",    shares:50,   actual:15000,  osub:false},
+    {name:"K Group Holding", shares:2000, actual:100000, osub:false, cap:""},
+    {name:"Joseph Sioufi",   shares:175,  actual:52500,  osub:false, cap:""},
+    {name:"Jihad Pakradon",  shares:175,  actual:52500,  osub:false, cap:""},
+    {name:"Rshied Khazen",   shares:50,   actual:15000,  osub:false, cap:""},
+    {name:"Dany Germanos",   shares:50,   actual:15000,  osub:false, cap:""},
+    {name:"Saleh Khazen",    shares:50,   actual:15000,  osub:false, cap:""},
   ]
 };
 const PALETTE = ["#09D18C","#0A8F63","#2E2E2F","#5BB3E0","#E0962F","#9B7EDE","#E06A8B","#3FA796","#C0392B","#6C7A89"];
@@ -279,33 +285,63 @@ const fmtPct = n => (n*100).toFixed(1)+"%";
 const fmtPctSign = n => (n>=0?"+":"")+(n*100).toFixed(1)+"%";
 const fmtSh = n => n.toLocaleString("en-US",{maximumFractionDigits:1});
 
-/* ---------------- Core model ---------------- */
+/* ---------------- Core model (Option A · active oversubscription) ----------------
+   Each investor's slider = their BASE commitment. Investors who tick
+   "Oversubscribe" automatically absorb the round's shortfall — the cash that
+   non-participants leave on the table — split pro-rata to their current
+   shareholding and bounded by an optional per-investor cap. Only what the
+   oversubscribers don't (or won't) cover spills over to the External Party. */
 function compute(){
   const pre=S.preMoney, round=S.round, exShares=S.existingShares;
   const price = exShares>0 ? pre/exShares : 0;
-  const sumActual = S.investors.reduce((a,i)=>a+(+i.actual||0),0);
-  const externalFill = Math.max(0, round - sumActual);
-  const totalRaised = sumActual + externalFill;          // == max(round, sumActual)
+
+  const base = S.investors.map(i=>+i.actual||0);          // committed via slider
+  const sumBase = base.reduce((a,b)=>a+b,0);
+  let gap = Math.max(0, round - sumBase);                 // shortfall to fill
+  const totalShortfall = gap;
+
+  // Waterfall: distribute the shortfall to oversubscribers, weighted by their
+  // current shareholding, capped at each one's headroom (cap − base). If one
+  // hits its cap, the remainder re-spreads across those still with room.
+  const alloc = S.investors.map(()=>0);
+  const headroom = S.investors.map((inv,i)=>{
+    if(!inv.osub) return 0;
+    const cap = (inv.cap===""||inv.cap==null) ? Infinity : (+inv.cap||0);
+    return Math.max(0, cap - base[i]);
+  });
+  let active = S.investors.map((inv,i)=>i).filter(i=>headroom[i]>0);
+  let guard=0;
+  while(gap>1e-6 && active.length>0 && guard++<200){
+    const wTotal = active.reduce((a,i)=>a+(S.investors[i].shares||0),0);
+    let distributed=0;
+    active.forEach(i=>{
+      const want = wTotal>0 ? gap*(S.investors[i].shares||0)/wTotal : gap/active.length;
+      const give = Math.min(want, headroom[i]-alloc[i]);
+      alloc[i]+=give; distributed+=give;
+    });
+    gap -= distributed;
+    active = active.filter(i=>headroom[i]-alloc[i] > 1e-6);
+    if(distributed<=1e-6) break;
+  }
+  const externalFill = Math.max(0, gap);                  // uncovered remainder
+  const sumOversub  = alloc.reduce((a,b)=>a+b,0);
+  const sumInternal = sumBase + sumOversub;
+  const totalRaised = sumInternal + externalFill;         // == max(round, sumBase)
   const totalNewShares = price>0 ? totalRaised/price : 0;
   const totalAfter = exShares + totalNewShares;
-
-  // eligible excess pool (oversubscribers above their pro-rata)
-  const totalExcess = S.investors.reduce((a,i)=>{
-    const prorata = (exShares>0 ? i.shares/exShares : 0)*round;
-    return a + (i.osub ? Math.max(0,(+i.actual||0)-prorata) : 0);
-  },0);
 
   const rows = S.investors.map((inv,idx)=>{
     const curPct = exShares>0 ? inv.shares/exShares : 0;
     const prorata = curPct*round;
-    const newShares = price>0 ? (+inv.actual||0)/price : 0;
+    const invested = base[idx] + alloc[idx];              // effective cash in
+    const newShares = price>0 ? invested/price : 0;
     const after = inv.shares + newShares;
     const newPct = totalAfter>0 ? after/totalAfter : 0;
-    const shortfall = Math.max(0, prorata-(+inv.actual||0));
-    const excess = inv.osub ? Math.max(0,(+inv.actual||0)-prorata) : 0;
+    const shortfall = Math.max(0, prorata-base[idx]);
     return {idx, name:inv.name, color:PALETTE[idx%PALETTE.length],
-      curShares:inv.shares, curPct, prorata, actual:(+inv.actual||0),
-      newShares, after, newPct, delta:newPct-curPct, shortfall, excess, osub:inv.osub};
+      curShares:inv.shares, curPct, prorata,
+      base:base[idx], oversub:alloc[idx], actual:invested,
+      newShares, after, newPct, delta:newPct-curPct, shortfall, osub:inv.osub};
   });
 
   // External party row
@@ -315,8 +351,8 @@ function compute(){
     curShares:0, curPct:0, prorata:0, actual:externalFill,
     newShares:extNew, after:extNew, newPct:extPct, delta:extPct, isExt:true};
 
-  return {price, pre, round, exShares, sumActual, externalFill, totalRaised,
-          totalNewShares, totalAfter, totalExcess, rows, ext};
+  return {price, pre, round, exShares, sumBase, sumOversub, sumInternal,
+          externalFill, totalShortfall, totalRaised, totalNewShares, totalAfter, rows, ext};
 }
 
 /* ---------------- Rendering ----------------
@@ -327,8 +363,8 @@ function compute(){
 function sliderMax(r){
   // scale each slider to the investor's own pro-rata, so the usable range
   // fills the whole track instead of a sliver at the far left
-  if(r.prorata>0) return Math.ceil(Math.max(r.prorata*2.5, r.actual*1.15, 25000));
-  return Math.ceil(Math.max(S.round, r.actual*1.15, 50000));
+  if(r.prorata>0) return Math.ceil(Math.max(r.prorata*2.5, r.base*1.15, 25000));
+  return Math.ceil(Math.max(S.round, r.base*1.15, 50000));
 }
 function sliderStep(max){
   const raw=max/250;                                   // ~250 stops across the range
@@ -350,13 +386,14 @@ function renderInputs(){
         <div class="inv-meta" data-meta="${r.idx}"></div>
       </div>
       <div class="inv-controls">
-        <input type="range" min="0" max="${max}" step="${step}" value="${Math.min(Math.round(r.actual),max)}" data-idx="${r.idx}" class="sld">
-        <div class="amt"><span class="pre">$</span><input type="number" min="0" step="1000" value="${Math.round(r.actual)}" data-idx="${r.idx}" class="num"></div>
+        <input type="range" min="0" max="${max}" step="${step}" value="${Math.min(Math.round(r.base),max)}" data-idx="${r.idx}" class="sld">
+        <div class="amt"><span class="pre">$</span><input type="number" min="0" step="1000" value="${Math.round(r.base)}" data-idx="${r.idx}" class="num"></div>
         <div style="display:flex;align-items:center;gap:8px">
-          <label class="osub" title="Allow commitment above pro-rata"><input type="checkbox" class="osw" data-idx="${r.idx}" ${inv.osub?"checked":""}>Oversub.</label>
+          <label class="osub" title="Absorb a share of the round's shortfall"><input type="checkbox" class="osw" data-idx="${r.idx}" ${inv.osub?"checked":""}>Oversub.</label>
           <button class="rm" data-idx="${r.idx}" title="Remove investor">&times;</button>
         </div>
       </div>
+      ${inv.osub?`<div class="caprow">Covers shortfall up to <span class="pre">$</span><input type="number" class="capnum" data-idx="${r.idx}" min="0" step="1000" value="${inv.cap??""}" placeholder="no limit"><span class="caphint">leave blank = unlimited</span></div>`:""}
     </div>`;
   }).join("");
   wireRows();
@@ -367,27 +404,32 @@ function renderOutputs(){
   const m = compute();
 
   // KPIs
-  const overUnder = m.sumActual - m.round;
+  const intSub = m.sumOversub>0
+      ? "incl. "+fmtUSD(m.sumOversub)+" oversub"
+      : (m.sumBase>m.round ? "+"+fmtUSD(m.sumBase-m.round)+" over"
+        : m.sumBase<m.round ? fmtUSD(m.round-m.sumBase)+" short of round" : "meets round");
   document.getElementById("kpis").innerHTML = `
     ${kpi("Price / Share", fmtUSD(m.price), "pre-money basis")}
     ${kpi("Post-money Valuation", fmtUSD(m.pre+m.round), "pre + round")}
     ${kpi("Total Raised", fmtUSD(m.totalRaised), "incl. external fill", true)}
-    ${kpi("External Fill", fmtUSD(m.externalFill), m.externalFill>0?"unallocated round":"fully covered")}
-    ${kpi("Internal Commitments", fmtUSD(m.sumActual), (overUnder>0?"+"+fmtUSD(overUnder)+" over":overUnder<0?fmtUSD(-overUnder)+" under":"meets round"))}
+    ${kpi("External Fill", fmtUSD(m.externalFill), m.externalFill>0?"uncovered shortfall":"fully covered")}
+    ${kpi("Internal Commitments", fmtUSD(m.sumInternal), intSub)}
   `;
 
   // Status pill
   const pill=document.getElementById("statusPill"), txt=document.getElementById("statusText"), dot=pill.querySelector(".dot");
-  if(Math.abs(overUnder)<1){ txt.textContent="Round fully covered by insiders"; dot.style.background="var(--wv-green)"; }
-  else if(overUnder>0){ txt.textContent="Oversubscribed by "+fmtUSD(overUnder); dot.style.background="var(--wv-amber)"; }
+  if(m.totalRaised > m.round+1){ txt.textContent="Oversubscribed by "+fmtUSD(m.totalRaised-m.round); dot.style.background="var(--wv-amber)"; }
+  else if(m.externalFill < 1){ txt.textContent="Round fully covered by insiders"; dot.style.background="var(--wv-green)"; }
   else { txt.textContent="External fills "+fmtUSD(m.externalFill); dot.style.background="var(--wv-green-deep)"; }
 
   // Per-row meta (text only — never touches the slider element)
   m.rows.forEach(r=>{
     const el=document.querySelector(`.inv-meta[data-meta="${r.idx}"]`);
     if(el){
-      const cover=r.prorata>0?Math.min(999,Math.round(r.actual/r.prorata*100)):0;
-      el.innerHTML=`Now <b>${fmtPct(r.curPct)}</b> · Pro-rata <b>${fmtUSD(r.prorata)}</b> · ${cover}% of pro-rata`;
+      let meta=`Now <b>${fmtPct(r.curPct)}</b> · Pro-rata <b>${fmtUSD(r.prorata)}</b>`;
+      if(r.oversub>0.5) meta+=` · <span class="osub-chip">+${fmtUSD(r.oversub)} oversub → ${fmtUSD(r.actual)} in</span>`;
+      else { const cover=r.prorata>0?Math.min(999,Math.round(r.base/r.prorata*100)):0; meta+=` · ${cover}% of pro-rata`; }
+      el.innerHTML=meta;
     }
   });
 
@@ -465,7 +507,16 @@ function wireRows(){
     const sld=document.querySelector(`.sld[data-idx="${i}"]`); if(sld) sld.value=Math.min(v,+sld.max);
     renderOutputs();
   }));
-  document.querySelectorAll(".osw").forEach(el=>el.addEventListener("change",e=>{ S.investors[+e.target.dataset.idx].osub=e.target.checked; renderOutputs(); }));
+  document.querySelectorAll(".osw").forEach(el=>el.addEventListener("change",e=>{
+    const i=+e.target.dataset.idx;
+    S.investors[i].osub=e.target.checked;
+    if(S.investors[i].cap===undefined) S.investors[i].cap="";
+    renderInputs();   // structural: shows/hides the cap field
+  }));
+  document.querySelectorAll(".capnum").forEach(el=>el.addEventListener("input",e=>{
+    S.investors[+e.target.dataset.idx].cap = e.target.value===""?"":(+e.target.value||0);
+    renderOutputs();
+  }));
   document.querySelectorAll(".rename").forEach(el=>el.addEventListener("change",e=>{ S.investors[+e.target.dataset.idx].name=e.target.value; renderOutputs(); }));
   document.querySelectorAll(".rm").forEach(el=>el.addEventListener("click",e=>{ S.investors.splice(+e.target.dataset.idx,1); renderInputs(); }));
 }
@@ -475,7 +526,7 @@ document.getElementById("round").oninput=e=>{ S.round=+e.target.value||0; render
 document.getElementById("existingShares").oninput=e=>{ S.existingShares=+e.target.value||0; renderInputs(); };
 
 document.getElementById("addInv").onclick=()=>{
-  S.investors.push({name:"New Investor "+(S.investors.length+1), shares:0, actual:100000, osub:true});
+  S.investors.push({name:"New Investor "+(S.investors.length+1), shares:0, actual:100000, osub:false, cap:""});
   renderInputs();
 };
 document.getElementById("resetAll").onclick=()=>{ S=structuredClone(BASE); syncLevers(); renderInputs(); };

@@ -193,6 +193,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       </div>
       <div class="hero-actions">
         <button class="status-pill" id="statusPill" title="Open setup & summary"><span class="dot"></span><span id="statusText">Fully funded</span></button>
+        <button class="gear" id="openInfo" title="How the model works">ⓘ How it works</button>
         <button class="gear" id="openSettings" title="Setup & summary">⚙ Setup</button>
       </div>
     </div>
@@ -222,6 +223,23 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       </div>
       <h3 class="modal-sub">Live summary</h3>
       <div class="kpis" id="kpis"></div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS MODAL (opened from the header) -->
+  <div class="modal-overlay" id="infoOverlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-label="How the model works">
+      <div class="modal-head">
+        <h2>How the model works</h2>
+        <button class="modal-close" id="closeInfo" aria-label="Close">&times;</button>
+      </div>
+      <div class="foot" style="margin-top:10px; font-size:13.5px">
+        Shares are issued at a fixed pre-money price per share = Pre-money ÷ Existing Shares.
+        Each investor receives (Actual Investment ÷ Price) new shares. Final ownership = (current + new shares) ÷ total shares after the round —
+        the denominator grows as money comes in, so ownership does <b>not</b> move linearly with the cheque size.
+        When investors <b>oversubscribe</b>, they absorb the shortfall left by non-participants first — split pro-rata to their current holding and capped at any limit you set — and only the remainder spills to the <b>External Party</b>.<br><br>
+        <span style="font-size:12px">Source model: <b>Docs/Shares Dashboard.xlsx</b> → "Dashboard" sheet (Option 4 · Pro-Rata + Oversubscription). Built for the Round 2 investor meeting.</span>
+      </div>
     </div>
   </div>
 
@@ -259,13 +277,6 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
     </div>
   </div>
 
-  <div class="foot">
-    <b>How the model works:</b> Shares are issued at a fixed pre-money price per share = Pre-money ÷ Existing Shares.
-    Each investor receives (Actual Investment ÷ Price) new shares. Final ownership = (current + new shares) ÷ total shares after the round —
-    the denominator grows as money comes in, so ownership does <b>not</b> move linearly with the cheque size.
-    When investors <b>oversubscribe</b>, they absorb the shortfall left by non-participants first — split pro-rata to their current holding and capped at any limit you set — and only the remainder spills to the <b>External Party</b>.<br>
-    <span style="font-size:11px">Source model: <b>Docs/Shares Dashboard.xlsx</b> → "Dashboard" sheet (Option 4 · Pro-Rata + Oversubscription). Built for the Round 2 investor meeting.</span>
-  </div>
 </div>
 
 <script>
@@ -545,15 +556,16 @@ function syncLevers(){
   document.getElementById("existingShares").value=S.existingShares;
 }
 
-/* ---- Setup & summary modal ---- */
-const overlay=document.getElementById("settingsOverlay");
-const openSettings=()=>{ overlay.hidden=false; };
-const closeSettings=()=>{ overlay.hidden=true; };
-document.getElementById("openSettings").onclick=openSettings;
-document.getElementById("statusPill").onclick=openSettings;
-document.getElementById("closeSettings").onclick=closeSettings;
-overlay.addEventListener("click",e=>{ if(e.target===overlay) closeSettings(); });
-document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&!overlay.hidden) closeSettings(); });
+/* ---- Modals (Setup & summary, How it works) ---- */
+function bindModal(openIds, overlayId, closeId){
+  const ov=document.getElementById(overlayId);
+  openIds.forEach(id=>{ const b=document.getElementById(id); if(b) b.onclick=()=>{ ov.hidden=false; }; });
+  document.getElementById(closeId).onclick=()=>{ ov.hidden=true; };
+  ov.addEventListener("click",e=>{ if(e.target===ov) ov.hidden=true; });
+}
+bindModal(["openSettings","statusPill"],"settingsOverlay","closeSettings");
+bindModal(["openInfo"],"infoOverlay","closeInfo");
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") document.querySelectorAll(".modal-overlay").forEach(ov=>ov.hidden=true); });
 
 syncLevers();
 renderInputs();

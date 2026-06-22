@@ -672,8 +672,8 @@ function applyPreset(p){
     const koein=/k group/i.test(inv.name);          // K Group is the lead investor
     const big=!koein && inv.shares>=100;            // Joseph & Jihad
     inv.cap=""; inv.capOpen=false; inv.osub=false; inv.actual=0;  // clean baseline
-    if(p==="prorata"){                               // K Group $60K, everyone else takes pro-rata
-      inv.actual = koein ? 60000 : prorata;
+    if(p==="prorata"){                               // K Group $0, everyone else takes pro-rata
+      inv.actual = koein ? 0 : prorata;
     } else if(p==="covergap"){                        // K Group $60K, everyone else covers the gap
       if(koein) inv.actual=60000; else inv.osub=true;
     } else if(p==="bigbackers"){                      // K Group $100K, big backers cover the gap, small holders out

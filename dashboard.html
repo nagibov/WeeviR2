@@ -194,7 +194,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
         </div>
         <p class="eyebrow" style="margin-top:14px">Round 2 Financing · Live Model</p>
         <h1>Cap Table Explorer</h1>
-        <p>Pro-rata participation with oversubscription. Adjust each investor's commitment live — price per share, new shares, and final ownership recalculate instantly. Any shortfall is auto-filled by an external party.</p>
+        <p>Pro-rata participation, with insiders able to cover the round's shortfall. Adjust each investor's commitment live — price per share, new shares, and final ownership recalculate instantly. Any uncovered gap is auto-filled by an external party.</p>
       </div>
       <div class="hero-actions">
         <button class="status-pill" id="statusPill" title="Open setup & summary"><span class="dot"></span><span id="statusText">Fully funded</span></button>
@@ -242,7 +242,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
         Shares are issued at a fixed pre-money price per share = Pre-money ÷ Existing Shares.
         Each investor receives (Actual Investment ÷ Price) new shares. Final ownership = (current + new shares) ÷ total shares after the round —
         the denominator grows as money comes in, so ownership does <b>not</b> move linearly with the cheque size.
-        When investors <b>oversubscribe</b>, they absorb the shortfall left by non-participants first — split pro-rata to their current holding and capped at any limit you set — and only the remainder spills to the <b>External Party</b>.<br><br>
+        When investors <b>cover the gap</b>, they absorb the shortfall left by non-participants first — split pro-rata to their current holding and capped at any limit you set — and only the remainder spills to the <b>External Party</b>.<br><br>
         <span style="font-size:12px">Source model: <b>Docs/Shares Dashboard.xlsx</b> → "Dashboard" sheet (Option 4 · Pro-Rata + Oversubscription). Built for the Round 2 investor meeting.</span>
       </div>
     </div>
@@ -267,7 +267,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
     <!-- INPUTS -->
     <div class="card">
       <h2>Participation</h2>
-      <p class="hint">Drag a slider or type each investor's commitment. Tick <b>Oversubscribe</b> and an investor automatically absorbs a share of the round's shortfall (weighted by holding, up to an optional cap) — shrinking or removing the External Party.</p>
+      <p class="hint">Drag a slider or type each investor's commitment. Tick <b>Cover gap</b> and an investor automatically absorbs the round's shortfall (weighted by holding, up to an optional limit) — shrinking or removing the External Party.</p>
       <div id="investors"></div>
       <div id="externalBlock"></div>
     </div>
@@ -414,7 +414,7 @@ function renderInputs(){
         <input type="range" min="0" max="${max}" step="${step}" value="${Math.min(Math.round(r.base),max)}" data-idx="${r.idx}" class="sld">
         <div class="amt"><span class="pre">$</span><input type="number" min="0" step="1000" value="${Math.round(r.base)}" data-idx="${r.idx}" class="num"></div>
         <div style="display:flex;align-items:center;gap:8px">
-          <label class="osub" title="Absorb a share of the round's shortfall"><input type="checkbox" class="osw" data-idx="${r.idx}" ${inv.osub?"checked":""}>Oversub.</label>
+          <label class="osub" title="Cover the shortfall left by non-participants"><input type="checkbox" class="osw" data-idx="${r.idx}" ${inv.osub?"checked":""}>Cover gap</label>
           <button class="rm" data-idx="${r.idx}" title="Remove investor">&times;</button>
         </div>
       </div>
@@ -430,7 +430,7 @@ function renderOutputs(){
 
   // KPIs
   const intSub = m.sumOversub>0
-      ? "incl. "+fmtUSD(m.sumOversub)+" oversub"
+      ? "incl. "+fmtUSD(m.sumOversub)+" gap cover"
       : (m.sumBase>m.round ? "+"+fmtUSD(m.sumBase-m.round)+" over"
         : m.sumBase<m.round ? fmtUSD(m.round-m.sumBase)+" short of round" : "meets round");
   document.getElementById("kpis").innerHTML = `
@@ -443,7 +443,7 @@ function renderOutputs(){
 
   // Status pill
   const pill=document.getElementById("statusPill"), txt=document.getElementById("statusText"), dot=pill.querySelector(".dot");
-  if(m.totalRaised > m.round+1){ txt.textContent="Oversubscribed by "+fmtUSD(m.totalRaised-m.round); dot.style.background="var(--wv-amber)"; }
+  if(m.totalRaised > m.round+1){ txt.textContent="Over-funded by "+fmtUSD(m.totalRaised-m.round); dot.style.background="var(--wv-amber)"; }
   else if(m.externalFill < 1){ txt.textContent="Round fully covered by insiders"; dot.style.background="var(--wv-green)"; }
   else { txt.textContent="External fills "+fmtUSD(m.externalFill); dot.style.background="var(--wv-green-deep)"; }
 
@@ -455,7 +455,7 @@ function renderOutputs(){
       if(r.osub){
         const cap=S.investors[r.idx].cap;
         const capTxt=(cap===""||cap==null)?"":` · limit ${fmtUSD(cap)}`;
-        const amt=r.oversub>0.5?`+${fmtUSD(r.oversub)} oversub → ${fmtUSD(r.actual)} in`:`oversubscribing`;
+        const amt=r.oversub>0.5?`+${fmtUSD(r.oversub)} to cover gap → ${fmtUSD(r.actual)} in`:`covering gap`;
         meta+=` · <span class="osub-chip" role="button" tabindex="0" title="Set / edit limit">${amt}${capTxt} ✎</span>`;
       } else {
         const cover=r.prorata>0?Math.min(999,Math.round(r.base/r.prorata*100)):0;

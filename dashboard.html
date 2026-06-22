@@ -325,7 +325,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
     <div class="card">
       <div style="display:flex; align-items:center; justify-content:space-between; gap:12px">
         <h2 style="margin:0">Result table</h2>
-        <button class="btn primary" id="openPresent" title="Full-screen investor view">⛶ Present</button>
+        <button class="btn primary" id="openPresent" title="Full-window investor view">⛶ Present</button>
       </div>
       <p class="hint">Final ownership for every shareholder after the round.</p>
       <div style="overflow-x:auto">
@@ -338,7 +338,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 
 <!-- FULL-SCREEN INVESTOR PRESENTATION VIEW -->
 <div class="present-overlay" id="presentOverlay" hidden>
-  <button class="present-close" id="closePresent" title="Exit (Esc)">✕ Exit full screen</button>
+  <button class="present-close" id="closePresent" title="Close (Esc)">✕ Close</button>
   <div class="present" id="presentBody"></div>
 </div>
 
@@ -470,7 +470,7 @@ function renderInputs(){
       </div>
       ${inv.osub?`
       <div class="inv-controls" style="grid-template-columns:1fr auto">
-        <span class="cover-note">Amount set automatically to cover the gap</span>
+        <span class="cover-note" data-cover="${r.idx}"></span>
         <div style="display:flex;align-items:center;gap:8px">
           <label class="osub" title="Cover the shortfall left by non-participants"><input type="checkbox" class="osw" data-idx="${r.idx}" checked>Cover gap</label>
           <button class="rm" data-idx="${r.idx}" title="Remove investor">&times;</button>
@@ -521,7 +521,7 @@ function renderOutputs(){
       if(r.osub){
         const cap=S.investors[r.idx].cap;
         const capTxt=(cap===""||cap==null)?"":` · limit ${fmtUSD(cap)}`;
-        const amt=r.oversub>0.5?`+${fmtUSD(r.oversub)} to cover gap → ${fmtUSD(r.actual)} in`:`covering gap`;
+        const amt=r.oversub>0.5?`+${fmtUSD(r.oversub)} to cover gap`:`covering gap`;
         meta+=` · <span class="osub-chip" role="button" tabindex="0" title="Set / edit limit">${amt}${capTxt} ✎</span>`;
       } else {
         const cover=r.prorata>0?Math.min(999,Math.round(r.base/r.prorata*100)):0;
@@ -529,6 +529,8 @@ function renderOutputs(){
       }
       el.innerHTML=meta;
     }
+    const cn=document.querySelector(`.cover-note[data-cover="${r.idx}"]`);
+    if(cn) cn.innerHTML=`Investing <b>${fmtUSD(r.actual)}</b> in total`;
   });
 
   // External Party block
@@ -712,16 +714,15 @@ const presentOverlay=document.getElementById("presentOverlay");
 function openPresent(){
   renderPresent();
   presentOverlay.hidden=false;
-  if(presentOverlay.requestFullscreen) presentOverlay.requestFullscreen().catch(()=>{});
+  document.body.style.overflow="hidden";   // lock background scroll
 }
 function closePresent(){
-  if(document.fullscreenElement) document.exitFullscreen().catch(()=>{});
   presentOverlay.hidden=true;
+  document.body.style.overflow="";
 }
 document.getElementById("openPresent").onclick=openPresent;
 document.getElementById("closePresent").onclick=closePresent;
-document.addEventListener("fullscreenchange",()=>{ if(!document.fullscreenElement) presentOverlay.hidden=true; });
-document.addEventListener("keydown",e=>{ if(e.key==="Escape") presentOverlay.hidden=true; });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&!presentOverlay.hidden) closePresent(); });
 document.addEventListener("keydown",e=>{ if(e.key==="Escape") document.querySelectorAll(".modal-overlay").forEach(ov=>ov.hidden=true); });
 
 syncLevers();

@@ -48,11 +48,31 @@ body{
 .eyebrow{font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--wv-green-deep); font-weight:700; margin:0 0 4px}
 h1{font-family:var(--font-display); font-weight:700; font-size:27px; margin:0; letter-spacing:-.01em; color:var(--wv-ink)}
 .hero p{margin:5px 0 0; color:var(--wv-body); max-width:640px; font-size:14px}
+.hero-actions{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
 .status-pill{
   display:inline-flex; align-items:center; gap:8px; font-weight:700; font-size:14px;
   padding:10px 18px; border-radius:999px; background:#fff; box-shadow:var(--shadow-rest);
+  border:none; cursor:pointer; font-family:var(--font-text); color:var(--wv-ink);
 }
+.status-pill:hover{filter:brightness(.98)}
 .status-pill .dot{width:10px; height:10px; border-radius:50%}
+.gear{
+  display:inline-flex; align-items:center; gap:7px; font-weight:700; font-size:14px;
+  padding:10px 16px; border-radius:999px; background:#fff; box-shadow:var(--shadow-rest);
+  border:none; cursor:pointer; font-family:var(--font-text); color:var(--wv-ink);
+}
+.gear:hover{filter:brightness(.98)}
+
+/* settings / summary modal */
+.modal-overlay{position:fixed; inset:0; background:rgba(46,46,47,.45); display:flex; align-items:center; justify-content:center; z-index:50; padding:24px}
+.modal-overlay[hidden]{display:none}
+.modal{background:#fff; border-radius:var(--radius-hero); padding:26px 28px; width:min(900px,100%); max-height:90vh; overflow:auto; box-shadow:0 20px 60px rgba(0,0,0,.28)}
+.modal-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:2px}
+.modal-head h2{font-family:var(--font-display); font-weight:700; font-size:20px; margin:0}
+.modal-close{border:none; background:transparent; font-size:28px; line-height:1; cursor:pointer; color:var(--wv-muted); padding:2px 10px; border-radius:8px}
+.modal-close:hover{background:var(--wv-surface); color:var(--wv-ink)}
+.modal-sub{font-family:var(--font-display); font-weight:700; font-size:15px; margin:22px 0 12px}
+.modal .kpis{margin-bottom:0}
 
 /* ---------- Global levers ---------- */
 .levers{
@@ -171,28 +191,39 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
         <h1>Cap Table Explorer</h1>
         <p>Pro-rata participation with oversubscription. Adjust each investor's commitment live — price per share, new shares, and final ownership recalculate instantly. Any shortfall is auto-filled by an external party.</p>
       </div>
-      <div class="status-pill" id="statusPill"><span class="dot"></span><span id="statusText">Fully funded</span></div>
+      <div class="hero-actions">
+        <button class="status-pill" id="statusPill" title="Open setup & summary"><span class="dot"></span><span id="statusText">Fully funded</span></button>
+        <button class="gear" id="openSettings" title="Setup & summary">⚙ Setup</button>
+      </div>
     </div>
   </div>
 
-  <!-- GLOBAL LEVERS -->
-  <div class="levers">
-    <div class="lever">
-      <label>Pre-money Valuation</label>
-      <div class="field"><span class="pre">$</span><input type="number" id="preMoney" step="100000"></div>
-    </div>
-    <div class="lever">
-      <label>Required Investment Round</label>
-      <div class="field"><span class="pre">$</span><input type="number" id="round" step="50000"></div>
-    </div>
-    <div class="lever">
-      <label>Existing Shares</label>
-      <div class="field"><input type="number" id="existingShares" step="100"></div>
+  <!-- SETUP & SUMMARY MODAL (opened from the header) -->
+  <div class="modal-overlay" id="settingsOverlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Setup and summary">
+      <div class="modal-head">
+        <h2>Setup &amp; summary</h2>
+        <button class="modal-close" id="closeSettings" aria-label="Close">&times;</button>
+      </div>
+      <p class="hint" style="margin-bottom:16px">Round assumptions — change these and the whole model recalculates instantly.</p>
+      <div class="levers">
+        <div class="lever">
+          <label>Pre-money Valuation</label>
+          <div class="field"><span class="pre">$</span><input type="number" id="preMoney" step="100000"></div>
+        </div>
+        <div class="lever">
+          <label>Required Investment Round</label>
+          <div class="field"><span class="pre">$</span><input type="number" id="round" step="50000"></div>
+        </div>
+        <div class="lever">
+          <label>Existing Shares</label>
+          <div class="field"><input type="number" id="existingShares" step="100"></div>
+        </div>
+      </div>
+      <h3 class="modal-sub">Live summary</h3>
+      <div class="kpis" id="kpis"></div>
     </div>
   </div>
-
-  <!-- KPI ROW -->
-  <div class="kpis" id="kpis"></div>
 
   <!-- TOOLBAR -->
   <div class="toolbar">
@@ -513,6 +544,16 @@ function syncLevers(){
   document.getElementById("round").value=S.round;
   document.getElementById("existingShares").value=S.existingShares;
 }
+
+/* ---- Setup & summary modal ---- */
+const overlay=document.getElementById("settingsOverlay");
+const openSettings=()=>{ overlay.hidden=false; };
+const closeSettings=()=>{ overlay.hidden=true; };
+document.getElementById("openSettings").onclick=openSettings;
+document.getElementById("statusPill").onclick=openSettings;
+document.getElementById("closeSettings").onclick=closeSettings;
+overlay.addEventListener("click",e=>{ if(e.target===overlay) closeSettings(); });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&!overlay.hidden) closeSettings(); });
 
 syncLevers();
 renderInputs();

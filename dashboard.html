@@ -204,6 +204,8 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 .caprow input.capnum:focus{outline:none; border-color:var(--wv-green); box-shadow:0 0 0 3px rgba(9,209,140,.14)}
 .caprow .caphint{color:var(--wv-muted); font-weight:500; font-size:11px}
 .cover-note{font-size:13px; color:var(--wv-green-deep); font-weight:600}
+.prorata-set{cursor:pointer; border-bottom:1px dashed var(--wv-muted); padding:0 1px; border-radius:3px}
+.prorata-set:hover{color:var(--wv-green-deep); border-bottom-color:var(--wv-green-deep); background:var(--wv-mint-tint)}
 .osub-chip{color:var(--wv-green-deep); font-weight:700; cursor:pointer; border-bottom:1px dashed currentColor; padding:1px 3px; border-radius:4px}
 .osub-chip:hover{background:var(--wv-mint-tint)}
 .caprow-close{margin-left:auto; border:none; background:transparent; color:var(--wv-green-deep); cursor:pointer; font-size:18px; line-height:1; padding:0 6px; border-radius:6px}
@@ -351,12 +353,12 @@ const BASE = {
   round: 750000,
   existingShares: 2500,
   investors: [
-    {name:"K Group Holding", shares:2000, actual:100000, osub:false, cap:""},
-    {name:"Joseph Sioufi",   shares:175,  actual:52500,  osub:false, cap:""},
-    {name:"Jihad Pakradoni",  shares:175,  actual:52500,  osub:false, cap:""},
-    {name:"Rsheid El Khazen", shares:50,   actual:15000,  osub:false, cap:""},
-    {name:"Dany Germanos",    shares:50,   actual:15000,  osub:false, cap:""},
-    {name:"Saleh El Khazen",  shares:50,   actual:15000,  osub:false, cap:""},
+    {name:"K Group Holding", shares:2000, actual:0, osub:false, cap:""},
+    {name:"Joseph Sioufi",   shares:175,  actual:0, osub:false, cap:""},
+    {name:"Jihad Pakradoni",  shares:175,  actual:0, osub:false, cap:""},
+    {name:"Rsheid El Khazen", shares:50,   actual:0, osub:false, cap:""},
+    {name:"Dany Germanos",    shares:50,   actual:0, osub:false, cap:""},
+    {name:"Saleh El Khazen",  shares:50,   actual:0, osub:false, cap:""},
   ]
 };
 const PALETTE = ["#09D18C","#0A8F63","#2E2E2F","#5BB3E0","#E0962F","#9B7EDE","#E06A8B","#3FA796","#C0392B","#6C7A89"];
@@ -515,7 +517,7 @@ function renderOutputs(){
   m.rows.forEach(r=>{
     const el=document.querySelector(`.inv-meta[data-meta="${r.idx}"]`);
     if(el){
-      let meta=`Now <b>${fmtPct(r.curPct)}</b> · Pro-rata <b>${fmtUSD(r.prorata)}</b>`;
+      let meta=`Now <b>${fmtPct(r.curPct)}</b> · Pro-rata <b class="prorata-set" role="button" tabindex="0" title="Click to set this investor to their pro-rata">${fmtUSD(r.prorata)}</b>`;
       if(r.osub){
         const cap=S.investors[r.idx].cap;
         const capTxt=(cap===""||cap==null)?"":` · limit ${fmtUSD(cap)}`;
@@ -699,13 +701,18 @@ function bindModal(openIds, overlayId, closeId){
 bindModal(["openSettings","statusPill"],"settingsOverlay","closeSettings");
 bindModal(["openInfo"],"infoOverlay","closeInfo");
 
-/* Click the oversub amount to open/close that investor's limit editor */
+/* Delegated clicks inside the investor list */
 document.getElementById("investors").addEventListener("click",e=>{
-  const chip=e.target.closest(".osub-chip"); if(!chip) return;
-  const row=chip.closest(".inv"); if(!row) return;
+  const row=e.target.closest(".inv"); if(!row) return;
   const i=+row.dataset.idx;
-  S.investors[i].capOpen=!S.investors[i].capOpen;
-  renderInputs();
+  if(e.target.closest(".osub-chip")){                 // open/close the limit editor
+    S.investors[i].capOpen=!S.investors[i].capOpen;
+    renderInputs();
+  } else if(e.target.closest(".prorata-set")){        // set this investor to their pro-rata
+    const inv=S.investors[i];
+    inv.actual=(S.existingShares>0?inv.shares/S.existingShares:0)*S.round;
+    renderInputs();
+  }
 });
 
 /* ---- Full-screen presentation ---- */

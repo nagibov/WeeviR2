@@ -305,13 +305,12 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
   <div class="toolbar">
     <span class="label">Scenarios</span>
     <div class="group">
-      <button class="btn" data-preset="prorata">Everyone pro-rata</button>
-      <button class="btn" data-preset="kgroup">K Group only</button>
-      <button class="btn" data-preset="minority">Minority only</button>
-      <button class="btn" data-preset="none">Nobody participates</button>
+      <button class="btn" data-preset="koein60">K Group $60K · others pro-rata</button>
+      <button class="btn" data-preset="koein60gap">K Group $60K · others cover gap</button>
+      <button class="btn" data-preset="bigonly">K Group $100K · big backers only</button>
+      <button class="btn" data-preset="smallout">K Group $100K · one small out</button>
     </div>
     <span class="spacer"></span>
-    <button class="btn primary" id="addInv">+ Add investor</button>
     <button class="btn ghost" id="resetAll">Reset to base case</button>
   </div>
 
@@ -664,23 +663,31 @@ document.getElementById("preMoney").oninput=e=>{ S.preMoney=+e.target.value||0; 
 document.getElementById("round").oninput=e=>{ S.round=+e.target.value||0; renderInputs(); };
 document.getElementById("existingShares").oninput=e=>{ S.existingShares=+e.target.value||0; renderInputs(); };
 
-document.getElementById("addInv").onclick=()=>{
-  S.investors.push({name:"New Investor "+(S.investors.length+1), shares:0, actual:100000, osub:false, cap:""});
-  renderInputs();
-};
 document.getElementById("resetAll").onclick=()=>{ S=structuredClone(BASE); syncLevers(); renderInputs(); };
 
 document.querySelectorAll("[data-preset]").forEach(b=>b.onclick=()=>applyPreset(b.dataset.preset));
 function applyPreset(p){
   const ex=S.existingShares, round=S.round;
-  S.investors.forEach(i=>{
-    const prorata=(ex>0?i.shares/ex:0)*round;
-    const isK=/k group/i.test(i.name);
-    const isMinor=i.shares<=50;
-    if(p==="prorata"){ i.actual=prorata; i.osub=false; }
-    else if(p==="kgroup"){ i.actual= isK?prorata:0; i.osub=false; }
-    else if(p==="minority"){ i.actual= isMinor?prorata:0; i.osub=false; }
-    else if(p==="none"){ i.actual=0; i.osub=false; }
+  // identify the last "small" holder (used by the drop-out scenario)
+  const smalls=S.investors.map((inv,idx)=>({inv,idx})).filter(o=>!/k group/i.test(o.inv.name)&&o.inv.shares<100).map(o=>o.idx);
+  const lastSmall=smalls.length?smalls[smalls.length-1]:-1;
+  S.investors.forEach((inv,idx)=>{
+    const prorata=(ex>0?inv.shares/ex:0)*round;
+    const koein=/k group/i.test(inv.name);          // K Group is the lead investor ("Koein")
+    const big=!koein && inv.shares>=100;            // Joseph & Jihad
+    const small=!koein && inv.shares<100;           // Rsheid, Dany, Saleh
+    inv.cap=""; inv.capOpen=false; inv.osub=false; inv.actual=0;  // clean baseline
+    if(p==="koein60"){                               // K Group $60K, everyone else takes pro-rata
+      inv.actual = koein ? 60000 : prorata;
+    } else if(p==="koein60gap"){                      // K Group $60K, everyone else covers the gap
+      if(koein) inv.actual=60000; else inv.osub=true;
+    } else if(p==="bigonly"){                         // K Group $100K, only the big backers join
+      if(koein) inv.actual=100000; else if(big) inv.actual=prorata;
+    } else if(p==="smallout"){                        // K Group $100K, one small out, big backers cover the gap
+      if(koein) inv.actual=100000;
+      else if(big) inv.osub=true;
+      else if(small && idx!==lastSmall) inv.actual=prorata;
+    }
   });
   renderInputs();
 }

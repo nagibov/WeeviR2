@@ -93,7 +93,7 @@ h1{font-family:var(--font-display); font-weight:700; font-size:27px; margin:0; l
 .present h1{font-family:var(--font-display); font-weight:700; font-size:clamp(30px,3.6vw,46px); margin:4px 0 6px; letter-spacing:-.01em; color:var(--wv-ink)}
 .present-sub{font-size:clamp(15px,1.4vw,19px); color:var(--wv-body)}
 .present-sub b{color:var(--wv-ink)}
-.present-kpis{display:grid; grid-template-columns:repeat(4,1fr); gap:clamp(12px,1.4vw,18px); margin:clamp(22px,3vw,36px) 0}
+.present-kpis{display:grid; grid-template-columns:repeat(5,1fr); gap:clamp(12px,1.4vw,18px); margin:clamp(22px,3vw,36px) 0}
 .present-kpi{background:rgba(255,255,255,.72); border-radius:18px; padding:clamp(16px,1.6vw,24px); box-shadow:var(--shadow-rest)}
 .present-kpi.hero{background:var(--wv-green); color:#fff; box-shadow:var(--shadow-green)}
 .present-kpi .l{font-size:11.5px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:var(--wv-muted)}
@@ -113,12 +113,16 @@ h1{font-family:var(--font-display); font-weight:700; font-size:27px; margin:0; l
 .ptable tr.total td.after{color:var(--wv-green-deep)}
 .ptable td.delta.up,.ptable td.delta.down,.ptable td.delta.flat{font-weight:700}
 .present-foot{margin-top:22px; text-align:center; font-size:13px; color:var(--wv-muted)}
-/* smooth entrance */
-.present-overlay{animation:presentFade .3s ease both}
-.present{animation:presentRise .42s cubic-bezier(.2,.7,.2,1) both}
+/* smooth entrance + exit */
+.present-overlay{animation:presentFade .34s ease both}
+.present{animation:presentRise .44s cubic-bezier(.2,.7,.2,1) both}
 @keyframes presentFade{from{opacity:0}to{opacity:1}}
 @keyframes presentRise{from{opacity:0; transform:translateY(18px) scale(.985)}to{opacity:1; transform:none}}
-@media (prefers-reduced-motion:reduce){.present-overlay,.present{animation:none}}
+.present-overlay.closing{animation:presentFadeOut .4s ease both}
+.present-overlay.closing .present{animation:presentSink .4s cubic-bezier(.4,0,.6,1) both}
+@keyframes presentFadeOut{from{opacity:1}to{opacity:0}}
+@keyframes presentSink{from{opacity:1; transform:none}to{opacity:0; transform:translateY(16px) scale(.99)}}
+@media (prefers-reduced-motion:reduce){.present-overlay,.present,.present-overlay.closing,.present-overlay.closing .present{animation:none}}
 @media (max-width:760px){
   .present-kpis{grid-template-columns:repeat(2,1fr)}
   .ptable th:nth-child(4),.ptable td:nth-child(4){display:none}
@@ -201,7 +205,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 .caprow input.capnum{font-family:var(--font-text); font-weight:700; font-size:14px; border:1px solid var(--wv-border); background:#fff; border-radius:8px; padding:3px 8px; width:118px; text-align:right; color:var(--wv-ink); -moz-appearance:textfield}
 .caprow input.capnum:focus{outline:none; border-color:var(--wv-green); box-shadow:0 0 0 3px rgba(9,209,140,.14)}
 .caprow .caphint{color:var(--wv-muted); font-weight:500; font-size:11px}
-.cover-note{display:flex; align-items:center; font-size:13px; color:var(--wv-green-deep); font-weight:600}
+.cover-note{font-size:13px; color:var(--wv-green-deep); font-weight:600}
 .osub-chip{color:var(--wv-green-deep); font-weight:700; cursor:pointer; border-bottom:1px dashed currentColor; padding:1px 3px; border-radius:4px}
 .osub-chip:hover{background:var(--wv-mint-tint)}
 .caprow-close{margin-left:auto; border:none; background:transparent; color:var(--wv-green-deep); cursor:pointer; font-size:18px; line-height:1; padding:0 6px; border-radius:6px}
@@ -605,6 +609,7 @@ function renderPresent(){
       ${pkpi("Investment Round", fmtUSD(m.round))}
       ${pkpi("Post-money Valuation", fmtUSD(m.pre+m.round), true)}
       ${pkpi("Price / Share", fmtUSD(m.price))}
+      ${pkpi("External Investment", fmtUSD(m.externalFill))}
     </div>
     <div class="present-table">
       <table class="ptable">
@@ -711,14 +716,25 @@ document.getElementById("investors").addEventListener("click",e=>{
 
 /* ---- Full-screen presentation ---- */
 const presentOverlay=document.getElementById("presentOverlay");
+let presentTimer=null;
 function openPresent(){
+  if(presentTimer){ clearTimeout(presentTimer); presentTimer=null; }
   renderPresent();
+  presentOverlay.classList.remove("closing");
   presentOverlay.hidden=false;
   document.body.style.overflow="hidden";   // lock background scroll
 }
 function closePresent(){
-  presentOverlay.hidden=true;
-  document.body.style.overflow="";
+  if(presentOverlay.hidden || presentOverlay.classList.contains("closing")) return;
+  const reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(reduce){ presentOverlay.hidden=true; document.body.style.overflow=""; return; }
+  presentOverlay.classList.add("closing");           // plays the exit animation
+  presentTimer=setTimeout(()=>{
+    presentOverlay.hidden=true;
+    presentOverlay.classList.remove("closing");
+    document.body.style.overflow="";
+    presentTimer=null;
+  }, 400);
 }
 document.getElementById("openPresent").onclick=openPresent;
 document.getElementById("closePresent").onclick=closePresent;

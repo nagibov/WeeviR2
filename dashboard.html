@@ -225,6 +225,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       <h2>Participation</h2>
       <p class="hint">Drag a slider or type an amount. Toggle <b>Oversubscribe</b> to let an investor commit above their pro-rata share.</p>
       <div id="investors"></div>
+      <div id="externalBlock"></div>
     </div>
 
     <!-- OUTPUTS -->
@@ -318,8 +319,51 @@ function compute(){
           totalNewShares, totalAfter, totalExcess, rows, ext};
 }
 
-/* ---------------- Rendering ---------------- */
-function render(){
+/* ---------------- Rendering ----------------
+   Split in two so dragging a slider NEVER rebuilds the slider element:
+   - renderInputs() rebuilds the investor rows (only on structural change)
+   - renderOutputs() recomputes KPIs/bars/table/meta on every drag         */
+
+function sliderMax(r){
+  // scale each slider to the investor's own pro-rata, so the usable range
+  // fills the whole track instead of a sliver at the far left
+  if(r.prorata>0) return Math.ceil(Math.max(r.prorata*2.5, r.actual*1.15, 25000));
+  return Math.ceil(Math.max(S.round, r.actual*1.15, 50000));
+}
+function sliderStep(max){
+  const raw=max/250;                                   // ~250 stops across the range
+  return [100,250,500,1000,2500,5000,10000,25000].find(v=>v>=raw)||25000;
+}
+
+function renderInputs(){
+  const m=compute();
+  document.getElementById("investors").innerHTML = m.rows.map(r=>{
+    const inv=S.investors[r.idx];
+    const max=sliderMax(r), step=sliderStep(max);
+    return `
+    <div class="inv" data-idx="${r.idx}">
+      <div class="inv-top">
+        <div class="inv-name">
+          <span class="sw" style="width:11px;height:11px;border-radius:3px;background:${r.color};display:inline-block"></span>
+          <input class="rename" value="${esc(inv.name)}" data-idx="${r.idx}">
+        </div>
+        <div class="inv-meta" data-meta="${r.idx}"></div>
+      </div>
+      <div class="inv-controls">
+        <input type="range" min="0" max="${max}" step="${step}" value="${Math.min(Math.round(r.actual),max)}" data-idx="${r.idx}" class="sld">
+        <div class="amt"><span class="pre">$</span><input type="number" min="0" step="1000" value="${Math.round(r.actual)}" data-idx="${r.idx}" class="num"></div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <label class="osub" title="Allow commitment above pro-rata"><input type="checkbox" class="osw" data-idx="${r.idx}" ${inv.osub?"checked":""}>Oversub.</label>
+          <button class="rm" data-idx="${r.idx}" title="Remove investor">&times;</button>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+  wireRows();
+  renderOutputs();
+}
+
+function renderOutputs(){
   const m = compute();
 
   // KPIs
@@ -338,31 +382,17 @@ function render(){
   else if(overUnder>0){ txt.textContent="Oversubscribed by "+fmtUSD(overUnder); dot.style.background="var(--wv-amber)"; }
   else { txt.textContent="External fills "+fmtUSD(m.externalFill); dot.style.background="var(--wv-green-deep)"; }
 
-  // Investor input rows
-  const box=document.getElementById("investors");
-  box.innerHTML = m.rows.map(r=>{
-    const inv=S.investors[r.idx];
-    const max=Math.max(m.round, r.prorata*2, r.actual, 50000);
-    const cover = r.prorata>0 ? Math.min(999,Math.round(r.actual/r.prorata*100)) : 0;
-    return `
-    <div class="inv" data-idx="${r.idx}">
-      <div class="inv-top">
-        <div class="inv-name">
-          <span class="sw" style="width:11px;height:11px;border-radius:3px;background:${r.color};display:inline-block"></span>
-          <input class="rename" value="${esc(inv.name)}" data-idx="${r.idx}">
-        </div>
-        <div class="inv-meta">Now <b>${fmtPct(r.curPct)}</b> · Pro-rata <b>${fmtUSD(r.prorata)}</b> · ${cover}% of pro-rata</div>
-      </div>
-      <div class="inv-controls">
-        <input type="range" min="0" max="${Math.ceil(max)}" step="1000" value="${r.actual}" data-idx="${r.idx}" class="sld">
-        <div class="amt"><span class="pre">$</span><input type="number" min="0" step="1000" value="${Math.round(r.actual)}" data-idx="${r.idx}" class="num"></div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <label class="osub" title="Allow commitment above pro-rata"><input type="checkbox" class="osw" data-idx="${r.idx}" ${inv.osub?"checked":""}>Oversub.</label>
-          <button class="rm" data-idx="${r.idx}" title="Remove investor">&times;</button>
-        </div>
-      </div>
-    </div>`;
-  }).join("") + `
+  // Per-row meta (text only — never touches the slider element)
+  m.rows.forEach(r=>{
+    const el=document.querySelector(`.inv-meta[data-meta="${r.idx}"]`);
+    if(el){
+      const cover=r.prorata>0?Math.min(999,Math.round(r.actual/r.prorata*100)):0;
+      el.innerHTML=`Now <b>${fmtPct(r.curPct)}</b> · Pro-rata <b>${fmtUSD(r.prorata)}</b> · ${cover}% of pro-rata`;
+    }
+  });
+
+  // External Party block
+  document.getElementById("externalBlock").innerHTML = `
     <div class="inv external">
       <div class="inv-top">
         <div class="inv-name"><span class="sw" style="width:11px;height:11px;border-radius:3px;background:#6C7A89;display:inline-block"></span>External Party <span class="tag">auto</span></div>
@@ -410,8 +440,6 @@ function render(){
     <td>Total</td><td>100.0%</td><td>${fmtUSD(m.totalRaised)}</td>
     <td>${fmtSh(totShares)}</td><td>100.0%</td><td>—</td></tr>`;
   tbl.innerHTML = head+"<tbody>"+body+extRow+totRow+"</tbody>";
-
-  wireRows();
 }
 
 function kpi(label,val,sub,green){
@@ -420,24 +448,37 @@ function kpi(label,val,sub,green){
 function deltaClass(d){ return d>0.0005?"delta up":d<-0.0005?"delta down":"delta flat"; }
 function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
 
-/* ---------------- Wiring ---------------- */
+/* ---------------- Wiring ----------------
+   Sliders & number boxes update ONLY outputs while dragging, so the
+   element you're holding is never recreated mid-drag. Structural changes
+   (add / remove / preset / lever / reset) rebuild the inputs.            */
 function wireRows(){
-  document.querySelectorAll(".sld").forEach(el=>el.oninput=e=>{ S.investors[+e.target.dataset.idx].actual=+e.target.value; render(); });
-  document.querySelectorAll(".num").forEach(el=>el.oninput=e=>{ S.investors[+e.target.dataset.idx].actual=+e.target.value||0; render(); });
-  document.querySelectorAll(".osw").forEach(el=>el.onchange=e=>{ S.investors[+e.target.dataset.idx].osub=e.target.checked; render(); });
-  document.querySelectorAll(".rename").forEach(el=>el.onchange=e=>{ S.investors[+e.target.dataset.idx].name=e.target.value; render(); });
-  document.querySelectorAll(".rm").forEach(el=>el.onclick=e=>{ S.investors.splice(+e.target.dataset.idx,1); render(); });
+  document.querySelectorAll(".sld").forEach(el=>el.addEventListener("input",e=>{
+    const i=+e.target.dataset.idx, v=+e.target.value;
+    S.investors[i].actual=v;
+    const num=document.querySelector(`.num[data-idx="${i}"]`); if(num) num.value=Math.round(v);
+    renderOutputs();
+  }));
+  document.querySelectorAll(".num").forEach(el=>el.addEventListener("input",e=>{
+    const i=+e.target.dataset.idx, v=+e.target.value||0;
+    S.investors[i].actual=v;
+    const sld=document.querySelector(`.sld[data-idx="${i}"]`); if(sld) sld.value=Math.min(v,+sld.max);
+    renderOutputs();
+  }));
+  document.querySelectorAll(".osw").forEach(el=>el.addEventListener("change",e=>{ S.investors[+e.target.dataset.idx].osub=e.target.checked; renderOutputs(); }));
+  document.querySelectorAll(".rename").forEach(el=>el.addEventListener("change",e=>{ S.investors[+e.target.dataset.idx].name=e.target.value; renderOutputs(); }));
+  document.querySelectorAll(".rm").forEach(el=>el.addEventListener("click",e=>{ S.investors.splice(+e.target.dataset.idx,1); renderInputs(); }));
 }
 
-document.getElementById("preMoney").oninput=e=>{ S.preMoney=+e.target.value||0; render(); };
-document.getElementById("round").oninput=e=>{ S.round=+e.target.value||0; render(); };
-document.getElementById("existingShares").oninput=e=>{ S.existingShares=+e.target.value||0; render(); };
+document.getElementById("preMoney").oninput=e=>{ S.preMoney=+e.target.value||0; renderInputs(); };
+document.getElementById("round").oninput=e=>{ S.round=+e.target.value||0; renderInputs(); };
+document.getElementById("existingShares").oninput=e=>{ S.existingShares=+e.target.value||0; renderInputs(); };
 
 document.getElementById("addInv").onclick=()=>{
   S.investors.push({name:"New Investor "+(S.investors.length+1), shares:0, actual:100000, osub:true});
-  render();
+  renderInputs();
 };
-document.getElementById("resetAll").onclick=()=>{ S=structuredClone(BASE); syncLevers(); render(); };
+document.getElementById("resetAll").onclick=()=>{ S=structuredClone(BASE); syncLevers(); renderInputs(); };
 
 document.querySelectorAll("[data-preset]").forEach(b=>b.onclick=()=>applyPreset(b.dataset.preset));
 function applyPreset(p){
@@ -451,7 +492,7 @@ function applyPreset(p){
     else if(p==="minority"){ i.actual= isMinor?prorata:0; i.osub=false; }
     else if(p==="none"){ i.actual=0; i.osub=false; }
   });
-  render();
+  renderInputs();
 }
 
 function syncLevers(){
@@ -461,7 +502,7 @@ function syncLevers(){
 }
 
 syncLevers();
-render();
+renderInputs();
 </script>
 </body>
 </html>

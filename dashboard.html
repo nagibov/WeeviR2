@@ -677,8 +677,10 @@ function applyPreset(p){
       inv.actual = koein ? 0 : prorata;
     } else if(p==="covergap"){                        // K Group $60K, everyone else covers the gap
       if(koein) inv.actual=60000; else inv.osub=true;
-    } else if(p==="bigbackers"){                      // K Group $100K, big backers cover the gap, small holders out
-      if(koein) inv.actual=100000; else if(big) inv.osub=true;
+    } else if(p==="bigbackers"){                      // K Group $100K, big backers cover the gap, smalls take pro-rata
+      if(koein) inv.actual=100000;
+      else if(big) inv.osub=true;
+      else inv.actual=prorata;
     }
   });
   renderInputs();

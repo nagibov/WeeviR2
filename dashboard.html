@@ -188,7 +188,7 @@ h1{font-family:var(--font-display); font-weight:700; font-size:27px; margin:0; l
 .inv-meta{font-size:12px; color:var(--wv-muted); font-variant-numeric:tabular-nums}
 .inv-meta b{color:var(--wv-body)}
 .inv-controls{display:grid; grid-template-columns:1fr 150px auto; gap:14px; align-items:center; margin-top:12px}
-input[type=range]{-webkit-appearance:none; appearance:none; width:100%; height:6px; border-radius:999px; background:var(--wv-surface); outline:none}
+input[type=range]{-webkit-appearance:none; appearance:none; width:100%; height:6px; margin:7px 0; border-radius:999px; background:var(--wv-surface); outline:none}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; appearance:none; width:20px; height:20px; border-radius:50%; background:var(--wv-green); cursor:pointer; box-shadow:0 2px 6px rgba(9,209,140,.4); border:3px solid #fff}
 input[type=range]::-moz-range-thumb{width:18px; height:18px; border-radius:50%; background:var(--wv-green); cursor:pointer; border:3px solid #fff}
 .amt{display:flex; align-items:center; gap:4px; background:var(--wv-off-white); border:1px solid var(--wv-border); border-radius:10px; padding:4px 8px}
@@ -471,8 +471,9 @@ function renderInputs(){
         <div class="inv-meta" data-meta="${r.idx}"></div>
       </div>
       ${inv.osub?`
-      <div class="inv-controls" style="grid-template-columns:1fr auto">
+      <div class="inv-controls">
         <span class="cover-note" data-cover="${r.idx}"></span>
+        <div class="amt" style="visibility:hidden" aria-hidden="true"><span class="pre">$</span><input type="number" value="0" tabindex="-1"></div>
         <div style="display:flex;align-items:center;gap:8px">
           <label class="osub" title="Cover the shortfall left by non-participants"><input type="checkbox" class="osw" data-idx="${r.idx}" checked>Cover gap</label>        </div>
       </div>`:`

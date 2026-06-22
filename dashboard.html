@@ -675,11 +675,11 @@ function applyPreset(p){
     inv.cap=""; inv.capOpen=false; inv.osub=false; inv.actual=0;  // clean baseline
     if(p==="prorata"){                               // K Group $0, everyone else takes pro-rata
       inv.actual = koein ? 0 : prorata;
-    } else if(p==="covergap"){                        // K Group $60K, everyone else covers the gap
-      if(koein) inv.actual=60000; else inv.osub=true;
-    } else if(p==="bigbackers"){                      // K Group $100K, big backers cover the gap, smalls take pro-rata
+    } else if(p==="covergap"){                        // K Group $60K, everyone else covers the gap (base = pro-rata)
+      if(koein) inv.actual=60000; else { inv.actual=prorata; inv.osub=true; }
+    } else if(p==="bigbackers"){                      // K Group $100K, big backers cover the gap (base = pro-rata), smalls pro-rata
       if(koein) inv.actual=100000;
-      else if(big) inv.osub=true;
+      else if(big){ inv.actual=prorata; inv.osub=true; }
       else inv.actual=prorata;
     }
   });

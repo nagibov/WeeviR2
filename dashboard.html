@@ -99,27 +99,29 @@ h1{font-family:var(--font-display); font-weight:700; font-size:27px; margin:0; l
 .present-kpi .l{font-size:11.5px; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:var(--wv-muted)}
 .present-kpi.hero .l{color:rgba(255,255,255,.88)}
 .present-kpi .v{font-family:var(--font-display); font-weight:700; font-size:clamp(24px,2.6vw,36px); margin-top:6px; font-variant-numeric:tabular-nums; letter-spacing:-.01em}
-.present-table{background:rgba(255,255,255,.82); border-radius:24px; padding:6px clamp(20px,2.4vw,34px); box-shadow:0 8px 30px rgba(0,0,0,.07)}
-.prow{display:grid; grid-template-columns:1.5fr 2.1fr 1fr; gap:clamp(16px,2.4vw,34px); align-items:center; padding:clamp(13px,1.5vw,20px) 0; border-bottom:1px solid var(--wv-border)}
-.prow:last-child{border-bottom:none}
-.prow.ptotal{border-top:2px solid var(--wv-ink); border-bottom:none}
-.prow .who{display:flex; align-items:center; gap:12px; min-width:0}
-.prow .who .dotc{width:14px; height:14px; border-radius:4px; flex:none}
-.prow .who .nm{font-weight:700; font-size:clamp(16px,1.5vw,20px); line-height:1.2}
-.prow .who .sub{font-size:clamp(11px,1vw,13px); color:var(--wv-muted); font-weight:500; font-variant-numeric:tabular-nums}
-.ptrack{position:relative; height:clamp(24px,2.4vw,32px); background:var(--wv-surface); border-radius:8px; overflow:hidden}
-.pseg{position:absolute; top:0; bottom:0; border-radius:8px}
-.pseg.now{background:#C7CFCB}
-.pseg.aft{background:var(--wv-green); top:auto; height:42%; bottom:14%; border-radius:6px; box-shadow:0 2px 6px rgba(9,209,140,.3)}
-.prow .pct{text-align:right; font-variant-numeric:tabular-nums}
-.prow .pct .big{font-family:var(--font-display); font-weight:700; font-size:clamp(24px,2.6vw,34px); line-height:1}
-.prow .pct .chg{font-size:clamp(12px,1.1vw,14px); margin-top:3px}
-.prow.ptotal .pct .big{color:var(--wv-green-deep)}
+.present-table{background:rgba(255,255,255,.82); border-radius:24px; padding:clamp(14px,1.8vw,26px) clamp(20px,2.4vw,34px); box-shadow:0 8px 30px rgba(0,0,0,.07)}
+.ptable{width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums}
+.ptable th{text-align:right; font-size:clamp(10px,1vw,12.5px); letter-spacing:.08em; text-transform:uppercase; color:var(--wv-muted); font-weight:700; padding:4px clamp(8px,1vw,16px) 14px}
+.ptable th:first-child{text-align:left}
+.ptable td{text-align:right; padding:clamp(11px,1.35vw,18px) clamp(8px,1vw,16px); border-top:1px solid var(--wv-border); font-size:clamp(14px,1.4vw,20px); color:var(--wv-body)}
+.ptable td:first-child{text-align:left; font-weight:700; color:var(--wv-ink)}
+.ptable .who{display:flex; align-items:center; gap:10px}
+.ptable .who .dotc{width:13px; height:13px; border-radius:4px; flex:none}
+.ptable td.after{font-family:var(--font-display); font-weight:700; font-size:clamp(18px,1.9vw,27px); color:var(--wv-ink)}
+.ptable tr.ext td, .ptable tr.ext td:first-child{color:var(--wv-green-deep)}
+.ptable tr.total td{font-weight:800; border-top:2px solid var(--wv-ink); font-size:clamp(15px,1.5vw,22px); color:var(--wv-ink)}
+.ptable tr.total td.after{color:var(--wv-green-deep)}
+.ptable td.delta.up,.ptable td.delta.down,.ptable td.delta.flat{font-weight:700}
 .present-foot{margin-top:22px; text-align:center; font-size:13px; color:var(--wv-muted)}
+/* smooth entrance */
+.present-overlay{animation:presentFade .3s ease both}
+.present{animation:presentRise .42s cubic-bezier(.2,.7,.2,1) both}
+@keyframes presentFade{from{opacity:0}to{opacity:1}}
+@keyframes presentRise{from{opacity:0; transform:translateY(18px) scale(.985)}to{opacity:1; transform:none}}
+@media (prefers-reduced-motion:reduce){.present-overlay,.present{animation:none}}
 @media (max-width:760px){
   .present-kpis{grid-template-columns:repeat(2,1fr)}
-  .prow{grid-template-columns:1.4fr 1fr; }
-  .prow .ptrack{display:none}
+  .ptable th:nth-child(4),.ptable td:nth-child(4){display:none}
 }
 
 /* ---------- Global levers ---------- */
@@ -173,7 +175,7 @@ h1{font-family:var(--font-display); font-weight:700; font-size:27px; margin:0; l
 /* investor rows */
 .inv{padding:14px 0; border-bottom:1px solid var(--wv-border)}
 .inv:last-child{border-bottom:none}
-.inv.external{background:var(--wv-mint-wash); border-radius:12px; padding:14px; margin-top:4px; border:1px dashed #B9E8D3}
+.inv.external{background:var(--wv-mint-wash); border-radius:12px; padding:14px; margin:0 0 12px; border:1px dashed #B9E8D3}
 .inv-top{display:flex; align-items:center; justify-content:space-between; gap:10px}
 .inv-name{font-weight:700; font-size:15px; display:flex; align-items:center; gap:8px}
 .inv-name .tag{font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--wv-green-deep); background:var(--wv-mint-tint); padding:2px 8px; border-radius:999px}
@@ -315,8 +317,8 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
     <div class="card">
       <h2>Participation</h2>
       <p class="hint">Drag a slider or type each investor's commitment. Tick <b>Cover gap</b> and an investor automatically absorbs the round's shortfall (weighted by holding, up to an optional limit) — shrinking or removing the External Party.</p>
-      <div id="investors"></div>
       <div id="externalBlock"></div>
+      <div id="investors"></div>
     </div>
 
     <!-- OUTPUTS -->
@@ -578,18 +580,14 @@ function renderPresent(){
   const totShares=m.rows.reduce((a,r)=>a+r.newShares,0)+m.ext.newShares;
 
   const pkpi=(l,v,hero)=>`<div class="present-kpi ${hero?"hero":""}"><div class="l">${l}</div><div class="v">${v}</div></div>`;
-  const prow=(r,opts={})=>{
-    const wNow=(r.curPct*100).toFixed(2), wAft=(r.newPct*100).toFixed(2);
-    const sub = opts.ext ? `New external investor · ${fmtUSD(r.actual)} in`
-                         : `${fmtUSD(r.actual)} in · ${fmtSh(r.newShares)} new shares`;
-    return `<div class="prow">
-      <div class="who"><span class="dotc" style="background:${r.color}"></span>
-        <div><div class="nm">${esc(r.name)}</div><div class="sub">${sub}</div></div></div>
-      <div class="ptrack"><div class="pseg now" style="width:${wNow}%"></div><div class="pseg aft" style="width:${wAft}%"></div></div>
-      <div class="pct"><div class="big">${fmtPct(r.newPct)}</div>
-        <div class="chg ${deltaClass(r.delta)}">${fmtPct(r.curPct)} → ${fmtPctSign(r.delta)}</div></div>
-    </div>`;
-  };
+  const trow=(r,cls)=>`<tr class="${cls||""}">
+    <td><div class="who"><span class="dotc" style="background:${r.color}"></span>${esc(r.name)}</div></td>
+    <td>${fmtPct(r.curPct)}</td>
+    <td>${fmtUSD(r.actual)}</td>
+    <td>${fmtSh(r.newShares)}</td>
+    <td class="after">${fmtPct(r.newPct)}</td>
+    <td class="${deltaClass(r.delta)}">${fmtPctSign(r.delta)}</td>
+  </tr>`;
 
   document.getElementById("presentBody").innerHTML = `
     <div class="present-head">
@@ -607,13 +605,18 @@ function renderPresent(){
       ${pkpi("Price / Share", fmtUSD(m.price))}
     </div>
     <div class="present-table">
-      ${m.rows.map(r=>prow(r)).join("")}
-      ${showExt?prow(m.ext,{ext:true}):""}
-      <div class="prow ptotal">
-        <div class="who"><span class="dotc" style="background:transparent"></span><div class="nm">Total</div></div>
-        <div class="ptrack" style="background:transparent"></div>
-        <div class="pct"><div class="big">100.0%</div><div class="chg" style="color:var(--wv-muted)">${fmtSh(totShares)} shares · ${fmtUSD(m.totalRaised)}</div></div>
-      </div>
+      <table class="ptable">
+        <thead><tr>
+          <th>Shareholder</th><th>Now %</th><th>Invest</th><th>New shares</th><th>After %</th><th>Δ vs now</th>
+        </tr></thead>
+        <tbody>
+          ${showExt?trow({...m.ext, name:"External Party"},"ext"):""}
+          ${m.rows.map(r=>trow(r)).join("")}
+          <tr class="total">
+            <td>Total</td><td>100.0%</td><td>${fmtUSD(m.totalRaised)}</td><td>${fmtSh(totShares)}</td><td class="after">100.0%</td><td>—</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
     <div class="present-foot">Weevi · Round 2 financing — figures recalculated live from the cap-table model</div>
   `;

@@ -603,9 +603,9 @@ function renderPresent(){
     <div class="present-kpis">
       ${pkpi("Pre-money Valuation", fmtUSD(m.pre))}
       ${pkpi("Investment Round", fmtUSD(m.round))}
-      ${pkpi("Post-money Valuation", fmtUSD(m.pre+m.round), true)}
+      ${pkpi("Post-money Valuation", fmtUSD(m.pre+m.round))}
       ${pkpi("Price / Share", fmtUSD(m.price))}
-      ${pkpi("External Investment", fmtUSD(m.externalFill))}
+      ${pkpi("External Investment", fmtUSD(m.externalFill), true)}
     </div>
     <div class="present-table">
       <table class="ptable">

@@ -308,6 +308,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       <button class="btn" data-preset="prorata">Pro-rata</button>
       <button class="btn" data-preset="covergap">Cover the gap</button>
       <button class="btn" data-preset="bigbackers">Big backers</button>
+      <button class="btn" data-preset="smallstep">Smalls step up</button>
     </div>
     <span class="spacer"></span>
     <button class="btn ghost" id="resetAll">Reset to base case</button>
@@ -353,7 +354,7 @@ const BASE = {
   investors: [
     {name:"K Group Holding", shares:2000, actual:0, osub:false, cap:""},
     {name:"Joseph Sioufi",   shares:175,  actual:0, osub:false, cap:""},
-    {name:"Jihad Pakradoni",  shares:175,  actual:0, osub:false, cap:""},
+    {name:"Jihad Pakradouni",  shares:175,  actual:0, osub:false, cap:""},
     {name:"Rsheid El Khazen", shares:50,   actual:0, osub:false, cap:""},
     {name:"Dany Germanos",    shares:50,   actual:0, osub:false, cap:""},
     {name:"Saleh El Khazen",  shares:50,   actual:0, osub:false, cap:""},
@@ -681,6 +682,10 @@ function applyPreset(p){
       if(koein) inv.actual=100000;
       else if(big){ inv.actual=prorata; inv.osub=true; }
       else inv.actual=prorata;
+    } else if(p==="smallstep"){                       // K Group $100K, smalls $72.5K each, big backers cover the gap
+      if(koein) inv.actual=100000;
+      else if(big){ inv.actual=prorata; inv.osub=true; }
+      else inv.actual=72500;
     }
   });
   renderInputs();
